@@ -1,0 +1,24 @@
+# This is the configuration used to check the rubocop source code.
+
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-factory_bot
+  - rubocop-capybara
+
+AllCops:
+  Enabled: true
+  Exclude:
+    - 'vendor/**/*'
+    - 'spec/fixtures/**/*'
+    - 'tmp/**/*'
+    - '.git/**/*'
+    - 'bin/*'
+    - 'db/**/*'
+    - 'Guardfile'
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+ Exclude: 
+    - 'config/**/*'
