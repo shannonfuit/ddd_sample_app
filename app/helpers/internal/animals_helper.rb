@@ -1,0 +1,2 @@
+module Internal::AnimalsHelper
+end

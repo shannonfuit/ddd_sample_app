@@ -66,3 +66,5 @@ group :test do
   gem "selenium-webdriver"
 end
 gem "rails_event_store", "~> 2.13.0"
+gem 'dry-types'
+gem 'dry-struct'
