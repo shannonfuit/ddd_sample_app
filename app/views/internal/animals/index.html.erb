@@ -1,0 +1,22 @@
+<!-- app/views/internal/animals/index.html.erb -->
+
+<h1>Animal List</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Registration Number</th>
+      <th>Registered By</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @animals.each do |animal| %>
+      <tr>
+        <td><%= animal.registration_number %></td>
+        <td><%= animal.registered_by %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to 'Register Animal', new_internal_animal_path %>
