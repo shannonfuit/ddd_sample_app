@@ -15,7 +15,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_01_064002) do
   enable_extension "plpgsql"
 
   create_table "animals", force: :cascade do |t|
-    t.string "registration_number"
+    t.string "uuid"
     t.string "registered_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

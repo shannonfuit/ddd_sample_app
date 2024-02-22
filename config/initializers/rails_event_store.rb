@@ -27,8 +27,12 @@ Rails.configuration.to_prepare do
   Rails.configuration.command_bus.tap do |bus|
     event_store = Rails.configuration.event_store
     bus.register(Administrating::RegisterAnimal, Administrating::OnRegisterAnimal.new(event_store))
-    bus.register(Administrating::AddPrice, Administrating::OnAddPrice.new(event_store))
-  #   bus.register(PrintInvoice, Invoicing::OnPrint.new)
-  #   bus.register(SubmitOrder, ->(cmd) { Ordering::OnSubmitOrder.new.call(cmd) })
+    bus.register(Administrating::RegisterChip, Administrating::OnRegisterChip.new(event_store))
+    bus.register(Administrating::ConfirmChipRegistryChange, Administrating::OnConfirmChipRegistryChange.new(event_store))
+  # this handler will be initialized once, make sure it is stateless
+  # bus.register(PrintInvoice, Invoicing::OnPrint.new)
+  #
+  # this handler will be initialized once per each call, in case each handler needs its own state
+  # bus.register(SubmitOrder, ->(cmd) { Ordering::OnSubmitOrder.new.call(cmd) })
   end
 end

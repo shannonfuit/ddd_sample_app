@@ -47,6 +47,8 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+  gem "pry-rails"
+  gem "pry-byebug"
 end
 
 group :development do
@@ -68,4 +70,5 @@ group :test do
 end
 gem "rails_event_store", "~> 2.13.0"
 gem 'dry-types'
+gem 'dry-validation'
 gem 'dry-struct'

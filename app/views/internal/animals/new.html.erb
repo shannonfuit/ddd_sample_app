@@ -2,8 +2,8 @@
 
 <%= form_with(url: internal_animals_path, method: :post) do |form| %>
   <div>
-    <%= form.label :registration_number %>
-    <%= form.text_field :registration_number, value: @registration_number, readonly: true %>
+    <%= form.label :uuid %>
+    <%= form.text_field :uuid, value: @uuid, readonly: true %>
   </div>
 
   <div>

@@ -1,5 +1,10 @@
 module Administrating
-  class AnimalPriceAdded < Infra::Event
-    attribute :registration_number, Types::String # TODO: uuid type
+  class AnimalRegistered < Infra::Event
+  end
+
+  class ChipRegistered < Infra::Event
+  end
+
+  class ChipRegistryChangeConfirmed < Infra::Event
   end
 end

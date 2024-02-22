@@ -4,37 +4,58 @@ module Administrating
 
     class HasAlreadyBeenRegistered < StandardError; end
     class NotRegistered < StandardError; end
-    class NoPriceSet < StandardError; end
 
     def initialize
       @state = :new
-      @price = nil
+      @chip = nil
       @registered_by = nil
     end
 
     def register(command)
       raise HasAlreadyBeenRegistered if @state == :registered
       apply AnimalRegistered.new(data: {
-        registration_number: command.registration_number,
+        animal_uuid: command.uuid,
         registered_by: command.registered_by
       })
     end
 
-    def add_price(command)
+    def register_chip(command)
       raise NotRegistered if @state != :registered
-      apply AnimalPriceAdded.new(data: {
-        price: command.price
+      apply ChipRegistered.new(data: {
+        animal_uuid: command.uuid,
+        number: command.number,
+        registry: command.registry,
       })
     end
+
+    def confirm_chip_registry_change(command)
+      raise NotRegistered if @state != :registered
+      apply ChipRegistryChangeConfirmed.new(data: {
+        animal_uuid: command.uuid
+      })
+    end
+
+    # def add_veterinary_visit(command)
+    #   raise NotRegistered if @state != :registered
+    #   apply VeterinaryVisitAdded.new(data: {
+    #     animal_uuid: command.uuid,
+    #     veterinary: command.price
+    #   })
+    # end
 
     on AnimalRegistered do |event|
       @state = :registered
       @registered_by = event.data.fetch(:registered_by)
     end
 
-    on AnimalPriceAdded do |event|
-      @price = event.data.fetch(:price)
+    on ChipRegistered do |event|
+      @chip = Chip.new(event.data.fetch(:number), event.data.fetch(:registry))
     end
+
+    on ChipRegistryChangeConfirmed do |event|
+      @chip = @chip.confirm_registry_change
+    end
+
 
     private
 

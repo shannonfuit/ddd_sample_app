@@ -12,7 +12,7 @@
   <tbody>
     <% @animals.each do |animal| %>
       <tr>
-        <td><%= animal.registration_number %></td>
+        <td><%= animal.uuid %></td>
         <td><%= animal.registered_by %></td>
       </tr>
     <% end %>

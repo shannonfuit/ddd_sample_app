@@ -1,13 +1,28 @@
 module Administrating
   class RegisterAnimal < Infra::Command
-    attribute :registration_number, Types::Uuid
-    attribute :registered_by, Types::FilledString
-    alias aggregate_id registration_number # Why??
+    configure_schema do |config|
+      config.required(:uuid).filled(:string)
+      config.required(:registered_by).filled(:string)
+    end
+
+    alias :aggregate_id :uuid
   end
 
-  class AddPrice < Infra::Command
-    attribute :registration_number, Types::Uuid
-    attribute :price, Types::Coercible::Decimal
-    alias aggregate_id registration_number
+  class RegisterChip < Infra::Command
+    configure_schema do |config|
+      config.required(:uuid).filled(:string)
+      config.required(:number).filled(:integer)
+      config.required(:registry).filled(:string)
+    end
+
+    alias :aggregate_id :uuid
+  end
+
+  class ConfirmChipRegistryChange < Infra::Command
+    configure_schema do |config|
+      config.required(:uuid).filled(:string)
+    end
+
+    alias :aggregate_id :uuid
   end
 end
