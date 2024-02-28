@@ -1,5 +1,5 @@
 module Animals
-  class OnAnimalRegistered
+  class OnAnimalRegistered < Infra::EventHandler
     def call(event)
       return if Animal.where(uuid: event.data.fetch(:animal_uuid)).exists?
       Animal.create(

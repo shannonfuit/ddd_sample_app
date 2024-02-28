@@ -3,9 +3,16 @@ require "aggregate_root"
 require "arkency/command_bus"
 
 Rails.configuration.to_prepare do
-  Rails.configuration.event_store = RailsEventStore::JSONClient.new
-  Rails.configuration.command_bus = Arkency::CommandBus.new
+# We choose for a JSON client, because we store data in postgres as jsonb,
+# By default  RailsEventStore::Client will use YAML
+  Rails.configuration.event_store = RailsEventStore::JSONClient.new(
+    dispatcher: RubyEventStore::ComposedDispatcher.new(
+      RailsEventStore::AfterCommitAsyncDispatcher.new(scheduler: RailsEventStore::ActiveJobScheduler.new(serializer: JSON)),
+      RubyEventStore::Dispatcher.new
+    )
+  )
 
+  Rails.configuration.command_bus = Arkency::CommandBus.new
 
   AggregateRoot.configure do |config|
     config.default_event_store = Rails.configuration.event_store
@@ -13,15 +20,28 @@ Rails.configuration.to_prepare do
 
   # Subscribe event handlers below
   Rails.configuration.event_store.tap do |store|
-    store.subscribe(Animals::OnAnimalRegistered, to: [Administrating::AnimalRegistered])
-    # store.subscribe(InvoiceReadModel.new, to: [InvoicePrinted])
-    # store.subscribe(lambda { |event| SendOrderConfirmation.new.call(event) }, to: [OrderSubmitted])
-    # store.subscribe_to_all_events(lambda { |event| Rails.logger.info(event.event_type) })
+   store.subscribe(Animals::OnAnimalRegistered.new, to: [Administrating::AnimalRegistered])
 
     store.subscribe_to_all_events(RailsEventStore::LinkByEventType.new)
     store.subscribe_to_all_events(RailsEventStore::LinkByCorrelationId.new)
     store.subscribe_to_all_events(RailsEventStore::LinkByCausationId.new)
   end
+  # examples:
+  #  Subscribe asynchroniously:
+  #  store.subscribe(Animals::OnAnimalRegistered, to: [Administrating::AnimalRegistered])
+  #
+  #  Subscribe synchroniously (this single instance is used to process all eevents, so keep it stateless)
+  #  store.subscribe(Animals::OnAnimalRegistered.new, to: [Administrating::AnimalRegistered])
+  #  Subscribe synchroniously (a new instance to process each event) - don't inherit your Handler from ActiveJob
+  #  store.subscribe(Animals::OnAnimalRegistered, to: [Administrating::AnimalRegistered])
+
+  #  Specify another method than `call` (Sync only)
+  #  store.subscribe( ->(event){ Animals::OnAnimalRegistered.new.foo(event) }, to: [Administrating::AnimalRegistered])
+  #  Subscribe to all events:
+  #  store.subscribe_to_all_events(Animals::OnAnyEvent) # Async
+  #  store.subscribe_to_all_events(Animals::OnAnyEvent.new) # Sync
+
+
 
   # Register command handlers below
   Rails.configuration.command_bus.tap do |bus|
@@ -29,10 +49,11 @@ Rails.configuration.to_prepare do
     bus.register(Administrating::RegisterAnimal, Administrating::OnRegisterAnimal.new(event_store))
     bus.register(Administrating::RegisterChip, Administrating::OnRegisterChip.new(event_store))
     bus.register(Administrating::ConfirmChipRegistryChange, Administrating::OnConfirmChipRegistryChange.new(event_store))
-  # this handler will be initialized once, make sure it is stateless
-  # bus.register(PrintInvoice, Invoicing::OnPrint.new)
+
+    # this handler will be initialized once, make sure it is stateless
+  # bus.register(Administrating::RegisterAnimal, Administrating::OnRegisterAnimal.new(event_store))
   #
   # this handler will be initialized once per each call, in case each handler needs its own state
-  # bus.register(SubmitOrder, ->(cmd) { Ordering::OnSubmitOrder.new.call(cmd) })
+  # bus.register(Administrating::RegisterAnimal, ->(cmd) {  Administrating::OnRegisterAnimal.new(event_store).call(cmd) })
   end
 end

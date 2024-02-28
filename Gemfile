@@ -72,3 +72,4 @@ gem "rails_event_store", "~> 2.13.0"
 gem 'dry-types'
 gem 'dry-validation'
 gem 'dry-struct'
+gem 'sidekiq'
