@@ -1,6 +1,7 @@
 module Infra
   class DomainTestHelper < ActiveSupport::TestCase
-    # TODO: move to helper
+    include ActiveJob::TestHelper
+
     def arrange(stream, events)
       events.each { |event| event_store.publish(event, stream_name: stream) }
     end

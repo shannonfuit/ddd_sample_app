@@ -1,7 +1,7 @@
 module Administrating
   class Animals < Infra::Repository
     def with_uuid(uuid, &block)
-      repository.with_aggregate(Animal.new, stream_name(uuid), &block)
+      with_aggregate(Animal.new, stream_name(uuid), &block)
     end
 
     private

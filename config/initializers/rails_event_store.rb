@@ -50,6 +50,10 @@ Rails.configuration.to_prepare do
     bus.register(Administrating::RegisterChip, Administrating::OnRegisterChip.new(event_store))
     bus.register(Administrating::ConfirmChipRegistryChange, Administrating::OnConfirmChipRegistryChange.new(event_store))
 
+    # DEMO
+    bus.register(Demo::DoSomethingSlow, Demo::OnDoSomethingSlow.new(event_store))
+    bus.register(Demo::DoSomethingFast, Demo::OnDoSomethingFast.new(event_store))
+
     # this handler will be initialized once, make sure it is stateless
   # bus.register(Administrating::RegisterAnimal, Administrating::OnRegisterAnimal.new(event_store))
   #
