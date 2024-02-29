@@ -10,9 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_14_183713) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_29_142645) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "animals", force: :cascade do |t|
+    t.string "uuid"
+    t.string "registered_by"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "event_store_events", force: :cascade do |t|
     t.uuid "event_id", null: false
@@ -36,6 +43,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_14_183713) do
     t.index ["event_id"], name: "index_event_store_events_in_streams_on_event_id"
     t.index ["stream", "event_id"], name: "index_event_store_events_in_streams_on_stream_and_event_id", unique: true
     t.index ["stream", "position"], name: "index_event_store_events_in_streams_on_stream_and_position", unique: true
+  end
+
+  create_table "my_active_record_aggregates", force: :cascade do |t|
+    t.string "uuid"
+    t.integer "amount_of_items"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"
