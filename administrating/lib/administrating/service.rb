@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Administrating
   class AnimalService
     def initialize(event_store)

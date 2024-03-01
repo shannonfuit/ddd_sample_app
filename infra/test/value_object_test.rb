@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module Infra
@@ -35,17 +37,17 @@ module Infra
     test 'equality' do
       assert_equal @obj1, @obj2
       assert_equal @obj1, @obj3
-      refute_equal @obj1, @obj4
-      refute_equal @obj1, @obj5
-      refute_equal @obj1, @obj6
+      assert_not_equal @obj1, @obj4
+      assert_not_equal @obj1, @obj5
+      assert_not_equal @obj1, @obj6
     end
 
     test 'hash equality' do
       assert_equal @obj1.hash, @obj2.hash
-      refute_equal @obj1.hash, @obj4.hash
-      refute_equal @obj2.hash, @obj5.hash
-      refute_equal @obj1.hash, @obj3.hash
-      refute_equal @obj1.hash, @obj6.hash
+      assert_not_equal @obj1.hash, @obj4.hash
+      assert_not_equal @obj2.hash, @obj5.hash
+      assert_not_equal @obj1.hash, @obj3.hash
+      assert_not_equal @obj1.hash, @obj6.hash
     end
   end
 end

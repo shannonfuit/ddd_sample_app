@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 module Administrating
   class Animals < Infra::Repository
-    def with_uuid(uuid, &block)
-      with_aggregate(Animal.new, stream_name(uuid), &block)
+    def with_uuid(uuid, &)
+      with_aggregate(Animal.new, stream_name(uuid), &)
     end
 
     private
+
     attr_reader :repository
 
     def stream_name(uuid)

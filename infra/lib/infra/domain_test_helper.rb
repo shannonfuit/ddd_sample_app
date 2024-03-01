@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Infra
   class DomainTestHelper < ActiveSupport::TestCase
     include ActiveJob::TestHelper

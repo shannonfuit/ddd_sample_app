@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module Infra
@@ -8,7 +10,7 @@ module Infra
         config.required(:registered_by).filled(:string)
       end
 
-      alias :aggregate_id :uuid
+      alias aggregate_id uuid
     end
 
     test 'can be initialized with valid arguments' do
@@ -43,11 +45,11 @@ module Infra
         MyCommand.new
       end
 
-      assert_equal("arguments cannot be nil", error.message)
+      assert_equal('arguments cannot be nil', error.message)
     end
 
     test 'raises when attributes are not keyword attributes' do
-      error = assert_raises(Infra::Command::InvalidError) do
+      assert_raises(Infra::Command::InvalidError) do
         MyCommand.new
       end
     end

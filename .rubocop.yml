@@ -1,0 +1,27 @@
+# This is the configuration used to check the rubocop source code.
+
+require:
+  - rubocop-rails
+  - rubocop-capybara
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - 'vendor/**/*'
+    - 'spec/fixtures/**/*'
+    - 'tmp/**/*'
+    - '.git/**/*'
+    - 'bin/*'
+    - 'db/**/*'
+    - 'Guardfile'
+Style/Documentation:
+  Enabled: false
+Rails/DeprecatedActiveModelErrorsMethods:
+  Exclude:
+    - 'infra/lib/infra/command.rb'
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Metrics/BlockLength:
+ Exclude: 
+    - 'config/**/*'

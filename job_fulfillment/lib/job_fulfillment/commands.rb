@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JobFulfillment
   class CreateJob < Infra::Command
     configure_schema do |config|
@@ -7,7 +9,7 @@ module JobFulfillment
       config.required(:number_of_spots).filled(:integer)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 
   class Apply < Infra::Command
@@ -18,7 +20,7 @@ module JobFulfillment
       config.required(:motivation).maybe(:string)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 
   class WithdrawApplication < Infra::Command
@@ -27,7 +29,7 @@ module JobFulfillment
       config.required(:application_uuid).filled(:string)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 
   class AcceptApplication < Infra::Command
@@ -36,7 +38,7 @@ module JobFulfillment
       config.required(:application_uuid).filled(:string)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 
   class RejectApplication < Infra::Command
@@ -45,7 +47,7 @@ module JobFulfillment
       config.required(:application_uuid).filled(:string)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 
   class ConfirmApplication < Infra::Command
@@ -54,7 +56,7 @@ module JobFulfillment
       config.required(:application_uuid).filled(:string)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 
   class CancelApplication < Infra::Command
@@ -64,6 +66,6 @@ module JobFulfillment
       config.required(:reason).maybe(:string)
     end
 
-    alias :aggregate_id :uuid
+    alias aggregate_id uuid
   end
 end

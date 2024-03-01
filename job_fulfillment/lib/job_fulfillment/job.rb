@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# rubocop: disable Metrics/ClassLength
 module JobFulfillment
   class Job
     include AggregateRoot
@@ -18,60 +21,63 @@ module JobFulfillment
 
     def create(starts_on:, ends_on:, number_of_spots:)
       raise HasAlreadyBeenCreated if @state == :created
+
       apply JobCreated.new(data: {
-        uuid: @uuid,
-        starts_on: starts_on,
-        ends_on: ends_on,
-        number_of_spots: number_of_spots
-      })
+                             uuid: @uuid,
+                             starts_on:,
+                             ends_on:,
+                             number_of_spots:
+                           })
     end
 
     def candidate_applies(application_uuid:, candidate_uuid:, motivation:)
-      application = @applications.find_by_candidate(candidate_uuid)
+      application = @applications.find_by(candidate: candidate_uuid)
       return if application&.pending?
 
       validate_can_apply(application)
 
       apply CandidateApplied.new(data: {
-        uuid: @uuid,
-        application_uuid: application_uuid, # late identity generation
-        candidate_uuid: candidate_uuid,
-        motivation: motivation
-      })
+                                   uuid: @uuid,
+                                   application_uuid:, # late identity generation
+                                   candidate_uuid:,
+                                   motivation:
+                                 })
     end
 
     def withdraw_application(application_uuid:)
-      application = @applications.find_by_uuid(application_uuid)
+      application = @applications.find_by(uuid: application_uuid)
       return if application&.withdrawn?
+
       validate_can_witdraw(application)
 
       apply ApplicationWithdrawn.new(data: {
-        uuid: @uuid,
-        application_uuid: application_uuid
-      })
+                                       uuid: @uuid,
+                                       application_uuid:
+                                     })
     end
 
     def accept_application(application_uuid:)
-      application = @applications.find_by_uuid(application_uuid)
+      application = @applications.find_by(uuid: application_uuid)
       return if application&.accepted?
 
       validate_can_accept(application)
 
       apply ApplicationAccepted.new(data: {
-        uuid: @uuid,
-        application_uuid: application_uuid
-      })
+                                      uuid: @uuid,
+                                      application_uuid:
+                                    })
     end
 
     def reject_application(application_uuid:)
-      application = @applications.find_by_uuid(application_uuid)
+      application = @applications.find_by(uuid: application_uuid)
       return if application&.rejected?
+
       validate_can_reject(application)
 
       apply ApplicationRejected.new(data: {
-        uuid: @uuid,
-        application_uuid: application_uuid
-      })
+                                      uuid: @uuid,
+                                      application_uuid:
+                                    })
     end
 
     private
@@ -88,28 +94,28 @@ module JobFulfillment
       @applications << Application.new(
         uuid: event.data.fetch(:application_uuid),
         candidate_uuid: event.data.fetch(:candidate_uuid),
-        motivation: event.data.fetch(:motivation),
+        motivation: event.data.fetch(:motivation)
       )
     end
 
     on ApplicationWithdrawn do |event|
-      application = @applications.find_by_uuid(event.data.fetch(:application_uuid))
+      application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.withdraw
     end
 
     on ApplicationRejected do |event|
-      application = @applications.find_by_uuid(event.data.fetch(:application_uuid))
+      application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.reject
     end
 
     on ApplicationAccepted do |event|
-      application = @applications.find_by_uuid(event.data.fetch(:application_uuid))
+      application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.accept
-      @available_spots =- 1
+      @available_spots = - 1
     end
 
     on ApplicationCancelled do |event|
-      application = @applications.find_by_uuid(event.data.fetch(:application_uuid))
+      application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.cancel(reason: event.data.fetch(:reason))
     end
 
@@ -147,3 +153,4 @@ module JobFulfillment
     end
   end
 end
+# rubocop: enable Metrics/ClassLength

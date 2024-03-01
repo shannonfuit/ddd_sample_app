@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module JobFulfillment
@@ -29,7 +31,7 @@ module JobFulfillment
     end
 
     test 'it validates the input of the command' do
-      expected_errors = { starts_on: ['is missing'], ends_on: ['is missing'], number_of_spots: ['is missing']}
+      expected_errors = { starts_on: ['is missing'], ends_on: ['is missing'], number_of_spots: ['is missing'] }
       error = assert_raises(Infra::Command::InvalidError) do
         create_invalid_job_command
       end

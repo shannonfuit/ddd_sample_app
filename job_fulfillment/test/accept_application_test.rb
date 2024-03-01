@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module JobFulfillment
@@ -27,19 +29,19 @@ module JobFulfillment
 
     test 'it raises when an application is not found' do
       assert_raises(Job::ApplicationNotFound) do
-        published = act(@stream, accept_application_command)
+        act(@stream, accept_application_command)
       end
     end
 
     test 'it cannot apply if the application is not pending' do
       arrange_candidate_rejected
       assert_raises(Job::ApplicationNotPending) do
-        published = act(@stream, accept_application_command)
+        act(@stream, accept_application_command)
       end
     end
 
     test 'it validates the input of the command' do
-      expected_errors = { application_uuid: ["is missing"] }
+      expected_errors = { application_uuid: ['is missing'] }
       error = assert_raises(Infra::Command::InvalidError) do
         invalid_accept_application_command
       end
@@ -66,7 +68,7 @@ module JobFulfillment
           uuid: @uuid,
           application_uuid: @application_uuid,
           candidate_uuid: SecureRandom.uuid,
-          motivation: @motivation,
+          motivation: @motivation
         }
       )
       arrange(@stream, [candidate_applied_event])
@@ -78,16 +80,15 @@ module JobFulfillment
         data:
         {
           uuid: @uuid,
-          application_uuid: @application_uuid,
+          application_uuid: @application_uuid
         }
       )
       arrange(@stream, [candidate_rejected_event])
     end
 
-
     def arrange_setup_for_test
       job_created_event = JobCreated.new(
-        data: job_created_data = {
+        data: {
           uuid: @uuid,
           starts_on: Time.zone.now.tomorrow,
           ends_on: Time.zone.now.tomorrow + 1.day,

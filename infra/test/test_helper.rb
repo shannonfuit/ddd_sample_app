@@ -1,1 +1,3 @@
-require_relative "../lib/infra"
+# frozen_string_literal: true
+
+require_relative '../lib/infra'

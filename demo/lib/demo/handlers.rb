@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Demo
   class Handler
     def initialize(event_store)
@@ -6,15 +8,14 @@ module Demo
     end
 
     private
+
     attr_reader :repository
   end
 
   class OnDoSomethingSlow < Handler
     def call(command)
       ActiveRecord::Base.transaction do
-        repository.with_uuid(command.aggregate_id) do |my_aggregate|
-          my_aggregate.do_something_slow
-        end
+        repository.with_uuid(command.aggregate_id, &:do_something_slow)
       end
     end
   end
@@ -22,9 +23,7 @@ module Demo
   class OnDoSomethingFast < Handler
     def call(command)
       ActiveRecord::Base.transaction do
-        repository.with_uuid(command.aggregate_id) do |my_aggregate|
-          my_aggregate.do_something_fast
-        end
+        repository.with_uuid(command.aggregate_id, &:do_something_fast)
       end
     end
   end

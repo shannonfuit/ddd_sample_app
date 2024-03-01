@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# rubocop: disable Metrics/AbcSize
 require 'dry-schema'
 require 'active_model'
 
@@ -24,10 +27,11 @@ module Infra
     # see Dry-validation docs for more information on the schema
     def initialize(*args)
       raise InvalidError, 'arguments cannot be nil' if args.first.nil?
-      raise InvalidError, 'provide input as keyword arguments' unless args.first.kind_of?(Hash)
+      raise InvalidError, 'provide input as keyword arguments' unless args.first.is_a?(Hash)
+
       schema_result = self.class.schema.call(args.first)
       if schema_result.failure?
-        raise InvalidError.new("Invalid command: #{schema_result.errors.to_h.to_s}", schema_result.errors)
+        raise InvalidError.new("Invalid command: #{schema_result.errors.to_h}", schema_result.errors)
       end
 
       super(schema_result.output)
@@ -55,6 +59,7 @@ module Infra
       def schema
         @schema || configure_schema
       end
+
       # @return [Hash]
       # @example
       # class MyCommand < Infra::Command
@@ -67,12 +72,10 @@ module Infra
       #  # => {"type"=>"object",
       #  #     "properties"=>{"uuid"=>{"type"=>"string"}, "registered_by"=>{"type"=>"string"}},
       #        "required"=>["uuid", "registered_by"]}
-      def json_schema
-        schema.json_schema
-      end
+      delegate :json_schema, to: :schema
 
       def set_attributes_from_schema
-        schema.rules.keys.each { |name| attribute(name.to_sym) }
+        schema.rules.each_key { |name| attribute(name.to_sym) }
       end
     end
 
@@ -107,3 +110,4 @@ module Infra
     end
   end
 end
+# rubocop: enable Metrics/AbcSize

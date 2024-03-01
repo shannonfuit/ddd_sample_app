@@ -1,8 +1,10 @@
-require "sidekiq/job"
+# frozen_string_literal: true
+
+require 'sidekiq/job'
 
 # TODO, enable sidekiq job
 module Infra
-  class EventHandler < ActiveJob::Base
+  class EventHandler < ApplicationJob
     prepend RailsEventStore::AsyncHandler
     # @param event [RubyEventStore::Event]
     # @return [void]

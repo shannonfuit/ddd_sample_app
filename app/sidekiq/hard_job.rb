@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class HardJob
   include Sidekiq::Job
 

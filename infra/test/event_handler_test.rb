@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require 'test_helper'
-require "active_support/testing/assertions"
+require 'active_support/testing/assertions'
 
 module Infra
   class EventHandlerTest < ActiveSupport::TestCase
     class MyEvent < Event
     end
-    class MyEventHandler < EventHandler
 
+    class MyEventHandler < EventHandler
       def call(event)
         event
       end

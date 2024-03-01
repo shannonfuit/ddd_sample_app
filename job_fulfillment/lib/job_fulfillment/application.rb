@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JobFulfillment
   class Application
     class Collection < Array

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Infra
   # A value object is an compound attribute, instead of a primitive attribute
   # like a String or an Integer. It is immutable and should be compared by
@@ -24,7 +26,7 @@ module Infra
     def ==(other)
       return false unless other.is_a?(self.class)
 
-      self.attributes == other.attributes
+      attributes == other.attributes
     end
 
     alias eql? ==

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JobFulfillment
   class CommandHandler
     def initialize(event_store)
@@ -5,6 +7,7 @@ module JobFulfillment
     end
 
     protected
+
     attr_reader :repository
   end
 
@@ -25,7 +28,7 @@ module JobFulfillment
       repository.with_uuid(command.aggregate_id) do |job|
         job.candidate_applies(
           application_uuid: command.application_uuid,
-          candidate_uuid:command.candidate_uuid,
+          candidate_uuid: command.candidate_uuid,
           motivation: command.motivation
         )
       end

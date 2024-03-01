@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 module JobFulfillment
@@ -35,7 +37,7 @@ module JobFulfillment
     end
 
     test 'it validates the input of the command' do
-      expected_errors = {candidate_uuid: ["is missing"], application_uuid: ["is missing"], motivation: ["is missing"]}
+      expected_errors = { candidate_uuid: ['is missing'], application_uuid: ['is missing'], motivation: ['is missing'] }
       error = assert_raises(Infra::Command::InvalidError) do
         invalid_candidate_applies_command
       end
@@ -52,7 +54,7 @@ module JobFulfillment
           uuid: @uuid,
           application_uuid: @application_uuid,
           candidate_uuid: @candidate_uuid,
-          motivation: @motivation,
+          motivation: @motivation
         }
       )
     end
@@ -64,7 +66,7 @@ module JobFulfillment
           uuid: @uuid,
           application_uuid: SecureRandom.uuid,
           candidate_uuid: SecureRandom.uuid,
-          motivation: @motivation,
+          motivation: @motivation
         }
       )
     end
@@ -84,7 +86,7 @@ module JobFulfillment
         uuid: @uuid,
         application_uuid: @application_uuid,
         candidate_uuid: @candidate_uuid,
-        motivation: @motivation,
+        motivation: @motivation
       )
     end
 

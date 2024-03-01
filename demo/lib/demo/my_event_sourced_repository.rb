@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 module Demo
   class MyEventSourcedRepository < Infra::Repository
-    def with_uuid(uuid, &block)
-      with_aggregate(MyEventSourcedAggregate.new(uuid), stream_name(uuid), &block)
+    def with_uuid(uuid, &)
+      with_aggregate(MyEventSourcedAggregate.new(uuid), stream_name(uuid), &)
     end
 
     private
+
     attr_reader :repository
 
     def stream_name(uuid)
