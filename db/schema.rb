@@ -46,10 +46,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_29_142645) do
   end
 
   create_table "my_active_record_aggregates", force: :cascade do |t|
-    t.string "uuid"
+    t.string "uuid", null: false
     t.integer "amount_of_items"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_my_active_record_aggregates_on_uuid", unique: true
   end
 
   add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"

@@ -11,6 +11,8 @@ module Infra
 
     # @param [Hash] args
     # @raise [InvalidError] when the args are invalid
+    # @raise [InvalidError] when the args are nil
+    # @raise [InvalidError] when the args are not keyword arguments
     # @return [Command]
     # @example
     #  class MyCommand < Infra::Command
@@ -22,6 +24,7 @@ module Infra
     # see Dry-validation docs for more information on the schema
     def initialize(*args)
       raise InvalidError, 'arguments cannot be nil' if args.first.nil?
+      raise InvalidError, 'provide input as keyword arguments' unless args.first.kind_of?(Hash)
       schema_result = self.class.schema.call(args.first)
       if schema_result.failure?
         raise InvalidError.new("Invalid command: #{schema_result.errors.to_h.to_s}", schema_result.errors)

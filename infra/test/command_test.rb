@@ -11,7 +11,7 @@ module Infra
       alias :aggregate_id :uuid
     end
 
-    test 'it is initialized with valid arguments' do
+    test 'can be initialized with valid arguments' do
       valid_args = { uuid: '123', registered_by: 'user' }
       command = MyCommand.new(valid_args)
 
@@ -20,8 +20,8 @@ module Infra
       assert_equal '123', command.aggregate_id
     end
 
-    test 'raises when initialized with a missing attributes' do
-      invalid_args = { uuid: '123' } # missing registered_by
+    test 'raises when initialized with missing attributes' do
+      invalid_args = { uuid: '123' }
       error = assert_raises(Infra::Command::InvalidError) do
         MyCommand.new(invalid_args)
       end
@@ -44,6 +44,12 @@ module Infra
       end
 
       assert_equal("arguments cannot be nil", error.message)
+    end
+
+    test 'raises when attributes are not keyword attributes' do
+      error = assert_raises(Infra::Command::InvalidError) do
+        MyCommand.new
+      end
     end
 
     test 'raises when initialized with extra attributes' do
