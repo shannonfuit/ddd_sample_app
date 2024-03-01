@@ -54,6 +54,13 @@ Rails.configuration.to_prepare do
     bus.register(Demo::DoSomethingSlow, Demo::OnDoSomethingSlow.new(event_store))
     bus.register(Demo::DoSomethingFast, Demo::OnDoSomethingFast.new(event_store))
 
+    # JobFulfillment
+    bus.register(JobFulfillment::CreateJob, JobFulfillment::OnCreate.new(event_store))
+    bus.register(JobFulfillment::Apply, JobFulfillment::OnApply.new(event_store))
+    bus.register(JobFulfillment::WithdrawApplication, JobFulfillment::OnWithdrawApplication.new(event_store))
+    bus.register(JobFulfillment::AcceptApplication, JobFulfillment::OnAcceptApplication.new(event_store))
+    bus.register(JobFulfillment::RejectApplication, JobFulfillment::OnRejectApplication.new(event_store))
+
     # this handler will be initialized once, make sure it is stateless
   # bus.register(Administrating::RegisterAnimal, Administrating::OnRegisterAnimal.new(event_store))
   #

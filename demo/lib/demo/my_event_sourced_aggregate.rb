@@ -1,6 +1,6 @@
 module Demo
   class MyEventSourcedAggregate
-    include AggregateRoot
+    include EventSourcedAggregateRoot
 
     def initialize(uuid)
       @amount_of_items = 0

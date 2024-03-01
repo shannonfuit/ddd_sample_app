@@ -8,6 +8,7 @@ Bundler.require(*Rails.groups)
 
 module DddSampleApp
   class Application < Rails::Application
+    config.paths.add 'job_fulfillment/lib', eager_load: true
     config.paths.add 'demo/lib', eager_load: true
     config.paths.add 'infra/lib', eager_load: true
     config.paths.add 'administrating/lib', eager_load: true
