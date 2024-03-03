@@ -2,7 +2,7 @@
 
 module JobFulfillment
   class Jobs < Infra::Repository
-    def with_uuid(uuid, &)
+    def with_job(uuid, &)
       with_aggregate(Job.new(uuid), stream_name(uuid), &)
     end
 

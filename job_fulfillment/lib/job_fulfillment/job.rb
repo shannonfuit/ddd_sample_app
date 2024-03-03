@@ -13,46 +13,45 @@ module JobFulfillment
       @uuid = uuid
       @state = :new
       @starts_on = nil
-      @ends_on = nil
-      @number_of_spots = nil
+      @spots = nil
       @available_spots = nil
       @applications = Application::Collection.new
     end
 
-    def create(starts_on:, ends_on:, number_of_spots:)
+    def create(starts_on:, spots:)
       raise HasAlreadyBeenCreated if @state == :created
 
       apply JobCreated.new(data: {
-                             uuid: @uuid,
+                             job_uuid: @uuid,
                              starts_on:,
-                             ends_on:,
-                             number_of_spots:
+                             spots:
                            })
     end
 
     def candidate_applies(application_uuid:, candidate_uuid:, motivation:)
-      application = @applications.find_by(candidate: candidate_uuid)
+      application = @applications.find_by(candidate_uuid:)
       return if application&.pending?
 
       validate_can_apply(application)
 
       apply CandidateApplied.new(data: {
-                                   uuid: @uuid,
-                                   application_uuid:, # late identity generation
+                                   job_uuid: @uuid,
+                                   application_uuid:,
                                    candidate_uuid:,
                                    motivation:
                                  })
     end
 
-    def withdraw_application(application_uuid:)
+    def withdraw_application(application_uuid:, candidate_uuid:)
       application = @applications.find_by(uuid: application_uuid)
       return if application&.withdrawn?
 
       validate_can_witdraw(application)
 
       apply ApplicationWithdrawn.new(data: {
-                                       uuid: @uuid,
-                                       application_uuid:
+                                       job_uuid: @uuid,
+                                       application_uuid:,
+                                       candidate_uuid:
                                      })
     end
 
@@ -63,7 +62,7 @@ module JobFulfillment
       validate_can_accept(application)
 
       apply ApplicationAccepted.new(data: {
-                                      uuid: @uuid,
+                                      job_uuid: @uuid,
                                       application_uuid:
                                     })
     end
@@ -75,7 +74,7 @@ module JobFulfillment
       validate_can_reject(application)
 
       apply ApplicationRejected.new(data: {
-                                      uuid: @uuid,
+                                      job_uuid: @uuid,
                                       application_uuid:
                                     })
     end
@@ -85,9 +84,8 @@ module JobFulfillment
     on JobCreated do |event|
       @state = :created
       @starts_on = event.data.fetch(:starts_on)
-      @ends_on = event.data.fetch(:ends_on)
-      @number_of_spots = event.data.fetch(:number_of_spots)
-      @available_spots = event.data.fetch(:number_of_spots)
+      @spots = event.data.fetch(:spots)
+      @available_spots = event.data.fetch(:spots)
     end
 
     on CandidateApplied do |event|
@@ -112,11 +110,6 @@ module JobFulfillment
       application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.accept
       @available_spots = - 1
-    end
-
-    on ApplicationCancelled do |event|
-      application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
-      application.cancel(reason: event.data.fetch(:reason))
     end
 
     def validate_can_apply(application)
@@ -145,7 +138,7 @@ module JobFulfillment
     end
 
     def validate_job_open
-      raise JobNotOpen if @state != :created || @starts_on <= Time.zone.now
+      raise JobNotOpen unless @state == :created && @starts_on.future?
     end
 
     def validate_available_spots

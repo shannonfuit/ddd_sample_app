@@ -21,7 +21,7 @@ module Internal
                        ))
 
       redirect_to internal_animal_path(params[:uuid]), notice: 'Animal was successfully created.'
-    rescue Infra::Command::InvalidError
+    rescue Infra::Command::Invalid
       @uuid = params[:uuid]
       render :new
     end

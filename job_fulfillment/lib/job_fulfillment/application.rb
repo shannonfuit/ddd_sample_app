@@ -3,6 +3,17 @@
 module JobFulfillment
   class Application
     class Collection < Array
+      def find_by(**args)
+        case args.keys.first
+        when :candidate_uuid
+          find_by_candidate(args[:candidate_uuid])
+        when :uuid
+          find_by_uuid(args[:uuid])
+        else
+          raise ArgumentError, "Unknown search criteria: #{args.keys.first}"
+        end
+      end
+
       def find_by_candidate(candidate_uuid)
         find { |app| app.candidate_uuid == candidate_uuid }
       end

@@ -2,9 +2,7 @@
 
 module Demo
   class DoSomethingSlow < Infra::Command
-    configure_schema do |config|
-      config.required(:uuid).filled(:string)
-    end
+    attribute :uuid, Infra::Types::UUID
 
     alias aggregate_id uuid
   end

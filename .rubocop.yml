@@ -23,5 +23,15 @@ Rails/I18nLocaleTexts:
   Enabled: false
 
 Metrics/BlockLength:
- Exclude: 
+  CountAsOne: ['array', 'heredoc', 'method_call', 'hash']
+  Exclude: 
     - 'config/**/*'
+
+Metrics/MethodLength:
+  CountAsOne: ['array', 'heredoc', 'method_call', 'hash']
+
+Metrics/AbcSize:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false

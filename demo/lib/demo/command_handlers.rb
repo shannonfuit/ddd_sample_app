@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
 module Demo
-  class Handler
-    def initialize(event_store)
+  class CommandHandler < Infra::CommandHandler
+    def initialize(**args)
+      super
       # @repository = MyEventSourcedRepository.new(event_store)
       @repository = MyActiveRecordRepository.new(event_store)
     end
-
-    private
-
-    attr_reader :repository
   end
 
-  class OnDoSomethingSlow < Handler
+  class OnDoSomethingSlow < CommandHandler
     def call(command)
       ActiveRecord::Base.transaction do
         repository.with_uuid(command.aggregate_id, &:do_something_slow)
@@ -20,7 +17,7 @@ module Demo
     end
   end
 
-  class OnDoSomethingFast < Handler
+  class OnDoSomethingFast < CommandHandler
     def call(command)
       ActiveRecord::Base.transaction do
         repository.with_uuid(command.aggregate_id, &:do_something_fast)

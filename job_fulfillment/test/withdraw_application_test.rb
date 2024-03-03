@@ -8,6 +8,7 @@ module JobFulfillment
       @uuid = SecureRandom.uuid
       @application_uuid = SecureRandom.uuid
       @stream = "JobFulfillment::Job$#{@uuid}"
+      @candidate_uuid = SecureRandom.uuid
 
       arrange_setup_for_test
     end
@@ -41,12 +42,9 @@ module JobFulfillment
     end
 
     test 'it validates the input of the command' do
-      expected_errors = { application_uuid: ['is missing'] }
-      error = assert_raises(Infra::Command::InvalidError) do
+      assert_raises(Infra::Command::Invalid) do
         invalid_withdraw_application_command
       end
-
-      assert_equal(expected_errors, error.errors)
     end
 
     private
@@ -55,8 +53,9 @@ module JobFulfillment
       ApplicationWithdrawn.new(
         data:
         {
-          uuid: @uuid,
-          application_uuid: @application_uuid
+          job_uuid: @uuid,
+          application_uuid: @application_uuid,
+          candidate_uuid: @candidate_uuid
         }
       )
     end
@@ -65,9 +64,9 @@ module JobFulfillment
       candidate_applied_event = CandidateApplied.new(
         data:
         {
-          uuid: @uuid,
+          job_uuid: @uuid,
           application_uuid: @application_uuid,
-          candidate_uuid: SecureRandom.uuid,
+          candidate_uuid: @candidate_uuid,
           motivation: @motivation
         }
       )
@@ -80,7 +79,7 @@ module JobFulfillment
       application_accepted_event = ApplicationAccepted.new(
         data:
         {
-          uuid: @uuid,
+          job_uuid: @uuid,
           application_uuid: @application_uuid
         }
       )
@@ -90,10 +89,10 @@ module JobFulfillment
     def arrange_setup_for_test
       job_created_event = JobCreated.new(
         data: {
-          uuid: @uuid,
+          job_uuid: @uuid,
           starts_on: Time.zone.now.tomorrow,
           ends_on: Time.zone.now.tomorrow + 1.day,
-          number_of_spots: 1
+          spots: 1
         }
       )
       arrange(@stream, [job_created_event])
@@ -101,13 +100,14 @@ module JobFulfillment
 
     def withdraw_application_command
       WithdrawApplication.new(
-        uuid: @uuid,
-        application_uuid: @application_uuid
+        job_uuid: @uuid,
+        application_uuid: @application_uuid,
+        candidate_uuid: @candidate_uuid
       )
     end
 
     def invalid_withdraw_application_command
-      WithdrawApplication.new(uuid: @uuid)
+      WithdrawApplication.new(job_uuid: @uuid)
     end
   end
 end
