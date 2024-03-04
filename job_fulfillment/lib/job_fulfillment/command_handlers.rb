@@ -19,6 +19,14 @@ module JobFulfillment
     end
   end
 
+  class OnChangeSpots < CommandHandler
+    def call(command)
+      repository.with_job(command.job_uuid) do |job|
+        job.change_spots(requested_spots: command.spots)
+      end
+    end
+  end
+
   class OnApply < CommandHandler
     def call(command)
       repository.with_job(command.job_uuid) do |job|

@@ -11,6 +11,7 @@ module JobFulfillment
       event_store.subscribe(CreateJobOnJobPublished.new, to: [JobDrafting::JobPublished])
 
       command_bus.register(CreateJob, OnCreate.new)
+      command_bus.register(ChangeSpots, OnChangeSpots.new)
       command_bus.register(Apply, OnApply.new)
       command_bus.register(WithdrawApplication, OnWithdrawApplication.new)
       command_bus.register(AcceptApplication, OnAcceptApplication.new)

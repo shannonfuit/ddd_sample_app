@@ -7,6 +7,11 @@ module JobFulfillment
     attribute :spots, Infra::Types::Spots
   end
 
+  class ChangeSpots < Infra::Command
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :spots, Infra::Types::Spots
+  end
+
   class Apply < Infra::Command
     attribute :job_uuid, Infra::Types::UUID
     attribute :candidate_uuid, Infra::Types::UUID

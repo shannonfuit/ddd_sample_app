@@ -21,6 +21,10 @@ module JobFulfillment
       def find_by_uuid(uuid)
         find { |app| app.uuid == uuid }
       end
+
+      def accepted_count
+        select(&:pending?).count
+      end
     end
 
     attr_reader :candidate_uuid, :uuid

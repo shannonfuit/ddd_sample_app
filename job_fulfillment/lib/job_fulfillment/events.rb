@@ -7,6 +7,18 @@ module JobFulfillment
     attribute :spots, Infra::Types::Spots
   end
 
+  class SpotsChangedToRequestedAmount < Infra::Event
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :spots, Infra::Types::Spots
+    attribute :available_spots, Infra::Types::Integer
+  end
+
+  class SpotsChangedToAcceptedAmount < Infra::Event
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :spots, Infra::Types::Spots
+    attribute :available_spots, Infra::Types::Integer
+  end
+
   class CandidateApplied < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
     attribute :application_uuid, Infra::Types::UUID

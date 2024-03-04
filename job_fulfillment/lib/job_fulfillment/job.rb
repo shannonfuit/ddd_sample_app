@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop: disable Metrics/ClassLength
 module JobFulfillment
   class Job
     include AggregateRoot
@@ -21,11 +20,33 @@ module JobFulfillment
     def create(starts_on:, spots:)
       raise HasAlreadyBeenCreated if @state == :created
 
-      apply JobCreated.new(data: {
-                             job_uuid: @uuid,
-                             starts_on:,
-                             spots:
-                           })
+      apply JobCreated.new(
+        data: {
+          job_uuid: @uuid,
+          starts_on:,
+          spots:
+        }
+      )
+    end
+
+    def change_spots(requested_spots:)
+      if @applications.accepted_count > requested_spots
+        apply SpotsChangedToRequestedAmount.new(
+          data: {
+            job_uuid: @uuid,
+            spots: @applications.accepted_count,
+            available_spots: requested_spots - @applications.accepted_count
+          }
+        )
+      else
+        apply SpotsChangedToAcceptedAmount.new(
+          data: {
+            job_uuid: @uuid,
+            spots: requested_spots,
+            available_spots: 0
+          }
+        )
+      end
     end
 
     def candidate_applies(application_uuid:, candidate_uuid:, motivation:)
@@ -34,12 +55,14 @@ module JobFulfillment
 
       validate_can_apply(application)
 
-      apply CandidateApplied.new(data: {
-                                   job_uuid: @uuid,
-                                   application_uuid:,
-                                   candidate_uuid:,
-                                   motivation:
-                                 })
+      apply CandidateApplied.new(
+        data: {
+          job_uuid: @uuid,
+          application_uuid:,
+          candidate_uuid:,
+          motivation:
+        }
+      )
     end
 
     def withdraw_application(application_uuid:, candidate_uuid:)
@@ -48,11 +71,13 @@ module JobFulfillment
 
       validate_can_witdraw(application)
 
-      apply ApplicationWithdrawn.new(data: {
-                                       job_uuid: @uuid,
-                                       application_uuid:,
-                                       candidate_uuid:
-                                     })
+      apply ApplicationWithdrawn.new(
+        data: {
+          job_uuid: @uuid,
+          application_uuid:,
+          candidate_uuid:
+        }
+      )
     end
 
     def accept_application(application_uuid:)
@@ -61,10 +86,12 @@ module JobFulfillment
 
       validate_can_accept(application)
 
-      apply ApplicationAccepted.new(data: {
-                                      job_uuid: @uuid,
-                                      application_uuid:
-                                    })
+      apply ApplicationAccepted.new(
+        data: {
+          job_uuid: @uuid,
+          application_uuid:
+        }
+      )
     end
 
     def reject_application(application_uuid:)
@@ -73,10 +100,12 @@ module JobFulfillment
 
       validate_can_reject(application)
 
-      apply ApplicationRejected.new(data: {
-                                      job_uuid: @uuid,
-                                      application_uuid:
-                                    })
+      apply ApplicationRejected.new(
+        data: {
+          job_uuid: @uuid,
+          application_uuid:
+        }
+      )
     end
 
     private
@@ -110,6 +139,16 @@ module JobFulfillment
       application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.accept
       @available_spots = - 1
+    end
+
+    on SpotsChangedToRequestedAmount do |event|
+      @spots = event.data.fetch(:spots)
+      @available_spots = event.data.fetch(:spots)
+    end
+
+    on SpotsChangedToAcceptedAmount do |event|
+      @spots = event.data.fetch(:spots)
+      @available_spots = event.data.fetch(:available_spots)
     end
 
     def validate_can_apply(application)

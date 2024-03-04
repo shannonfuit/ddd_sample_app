@@ -10,6 +10,7 @@ Bundler.require(*Rails.groups)
 
 module DddSampleApp
   class Application < Rails::Application
+    config.paths.add 'processes/lib', eager_load: true
     config.paths.add 'job_drafting/lib', eager_load: true
     config.paths.add 'job_fulfillment/lib', eager_load: true
     config.paths.add 'demo/lib', eager_load: true
