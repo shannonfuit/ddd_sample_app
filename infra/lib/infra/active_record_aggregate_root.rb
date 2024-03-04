@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Infra
   module ActiveRecordAggregateRoot
     def unpublished_events
@@ -7,7 +9,7 @@ module Infra
     private
 
     def apply(*events)
-      events.each {|event| unpublished_events << event}
+      events.each { |event| unpublished_events << event }
     end
   end
 end

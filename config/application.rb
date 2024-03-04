@@ -1,6 +1,8 @@
-require_relative "boot"
+# frozen_string_literal: true
 
-require "rails/all"
+require_relative 'boot'
+
+require 'rails/all'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -8,6 +10,8 @@ Bundler.require(*Rails.groups)
 
 module DddSampleApp
   class Application < Rails::Application
+    config.paths.add 'job_drafting/lib', eager_load: true
+    config.paths.add 'job_fulfillment/lib', eager_load: true
     config.paths.add 'demo/lib', eager_load: true
     config.paths.add 'infra/lib', eager_load: true
     config.paths.add 'administrating/lib', eager_load: true
@@ -17,7 +21,7 @@ module DddSampleApp
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w(assets tasks))
+    config.autoload_lib(ignore: %w[assets tasks])
 
     # Configuration for the application, engines, and railties goes here.
     #

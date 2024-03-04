@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Administrating
   class AdoptionStatus < ValueObject
     attr_reader :vet_approval, :behavior_test_results, :vaccinated, :chipped

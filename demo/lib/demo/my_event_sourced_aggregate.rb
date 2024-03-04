@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module Demo
   class MyEventSourcedAggregate
-    include AggregateRoot
+    include EventSourcedAggregateRoot
 
-    def initialize(uuid)
+    def initialize(_uuid)
       @amount_of_items = 0
     end
 
@@ -15,15 +17,15 @@ module Demo
       apply SlowItemAdded.new(data: { amount_of_items: @amount_of_items })
     end
 
-    on FastItemAdded do |event|
+    on FastItemAdded do |_event|
       @amount_of_items += 1
-      puts "*** on FastItemAdded"
+      puts '*** on FastItemAdded'
       puts @amount_of_items
     end
 
-    on SlowItemAdded do |event|
+    on SlowItemAdded do |_event|
       @amount_of_items += 1
-      puts "*** on FastSlowAdded"
+      puts '*** on FastSlowAdded'
       puts @amount_of_items
     end
   end

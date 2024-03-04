@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Infra
   class DomainTestHelper < ActiveSupport::TestCase
     include ActiveJob::TestHelper
@@ -9,6 +11,13 @@ module Infra
     def act(stream, command)
       before = event_store.read.stream(stream).each.to_a
       command_bus.call(command)
+      after = event_store.read.stream(stream).each.to_a
+      after.reject { |a| before.any? { |b| a.event_id == b.event_id } }
+    end
+
+    def handle_event(stream, event)
+      before = event_store.read.stream(stream).each.to_a
+      event_store.publish(event)
       after = event_store.read.stream(stream).each.to_a
       after.reject { |a| before.any? { |b| a.event_id == b.event_id } }
     end
