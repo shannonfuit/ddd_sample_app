@@ -15,4 +15,20 @@ module JobDrafting
   class UnpublishJob < Infra::Command
     attribute :job_uuid, Infra::Types::UUID
   end
+
+  class SubmitSpotsChangeRequest < Infra::Command
+    attribute :spots_change_request_uuid, Infra::Types::UUID
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :current_spots, Infra::Types::Spots
+    attribute :requested_spots, Infra::Types::Spots
+  end
+
+  class AcceptSpotsChangeRequest < Infra::Command
+    attribute :spots_change_request_uuid, Infra::Types::UUID
+  end
+
+  class RejectSpotsChangeRequest < Infra::Command
+    attribute :spots_change_request_uuid, Infra::Types::UUID
+    attribute :max_spots, Infra::Types::Spots
+  end
 end

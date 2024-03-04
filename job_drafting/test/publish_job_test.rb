@@ -43,20 +43,20 @@ module JobDrafting
     private
 
     def shift_set_event
-      ShiftSet.new(
+      ShiftSetOnJob.new(
         data: { job_uuid: @job_uuid,
                 shift: { starts_on: @shift_duration[:starts_on], ends_on: @shift_duration[:ends_on] } }
       )
     end
 
     def spots_set_event
-      SpotsSet.new(
+      SpotsSetObJob.new(
         data: { job_uuid: @job_uuid, spots: 1 }
       )
     end
 
     def vacancy_set_event
-      VacancySet.new(
+      VacancySetObJob.new(
         data: { job_uuid: @job_uuid,
                 vacancy: { title: @title, description: @description,
                            dress_code_requirements: @dress_code_requirements } }
@@ -64,13 +64,13 @@ module JobDrafting
     end
 
     def wage_per_hour_set_event
-      WagePerHourSet.new(
+      WagePerHourSetOnJob.new(
         data: { job_uuid: @job_uuid, wage_per_hour: @wage_per_hour }
       )
     end
 
     def work_location_set_event
-      WorkLocationSet.new(
+      WorkLocationSetOnJob.new(
         data: { job_uuid: @job_uuid, work_location: @work_location }
       )
     end
