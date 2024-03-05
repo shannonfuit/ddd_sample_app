@@ -18,27 +18,42 @@ module JobFulfillment
 
     test 'the number of spots can be changed to the requested amount' do
       published = act(@stream, change_spots_command)
-      expected_events = [spots_changed_to_requested_amount_event]
+      expected_events = [spots_changed_as_requested_event]
 
       assert_changes(published, expected_events)
     end
 
-    # test 'the number of spots is changed to the accepted amount' do
-    #   arrange_another_candidate_applied
-    #   arrange(@stream, [change_spots_command])
-    #   published = act(@stream, spots_changed_to_accepted_amount_event)
+    test 'the number of spots is changed to the minimum required amount' do
+      arrange_another_candidate_applied
+      published = act(@stream, change_spots_command)
+      expected_events = [spots_changed_to_minimum_required_event]
 
-    #   assert_no_changes(published)
-    # end
+      assert_changes(published, expected_events)
+    end
 
-    # test 'it validates the input of the command' do
-    #   assert_raises(Infra::Command::Invalid) do
-    #     invalid_candidate_applies_command
-    #   end
-    # end
+    test 'it validates the input of the command' do
+      assert_raises(Infra::Command::Invalid) do
+        invalid_change_spots_command
+      end
+    end
 
     private
 
+    # commands
+    def change_spots_command
+      ChangeSpots.new(
+        job_uuid: @job_uuid,
+        spots: 1
+      )
+    end
+
+    def invalid_change_spots_command
+      ChangeSpots.new(
+        job_uuid: @job_uuid
+      )
+    end
+
+    # events
     def arrange_setup_for_test
       arrange(
         @stream,
@@ -57,13 +72,6 @@ module JobFulfillment
           another_candidate_applied_event,
           another_application_accepted_event
         ]
-      )
-    end
-
-    def change_spots_command
-      ChangeSpots.new(
-        job_uuid: @job_uuid,
-        spots: 1
       )
     end
 
@@ -120,8 +128,8 @@ module JobFulfillment
       )
     end
 
-    def spots_changed_to_requested_amount_event
-      SpotsChangedToRequestedAmount.new(
+    def spots_changed_as_requested_event
+      SpotsChangedAsRequested.new(
         data: {
           job_uuid: @job_uuid,
           spots: 1,
@@ -130,8 +138,8 @@ module JobFulfillment
       )
     end
 
-    def spots_changed_to_accepted_amount_event
-      SpotsChangedToAcceptedAmount.new(
+    def spots_changed_to_minimum_required_event
+      SpotsChangedToMinimumRequired.new(
         data: {
           job_uuid: @job_uuid,
           spots: 2,
@@ -139,9 +147,5 @@ module JobFulfillment
         }
       )
     end
-
-    # def invalid_candidate_applies_command
-    #   Apply.new(job_uuid: @job_uuid)
-    # end
   end
 end

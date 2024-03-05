@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Infra
-  class Repository
+  class AggregateRootRepository
     def initialize(event_store)
       @repository = AggregateRoot::Repository.new(event_store)
     end

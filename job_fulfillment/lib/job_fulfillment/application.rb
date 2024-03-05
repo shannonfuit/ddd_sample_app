@@ -23,7 +23,7 @@ module JobFulfillment
       end
 
       def accepted_count
-        select(&:pending?).count
+        select(&:accepted?).count
       end
     end
 

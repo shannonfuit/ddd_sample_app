@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Demo
-  class MyEventSourcedRepository < Infra::Repository
+  class MyEventSourcedRepository < Infra::AggregateRootRepository
     def with_uuid(uuid, &)
       with_aggregate(MyEventSourcedAggregate.new(uuid), stream_name(uuid), &)
     end

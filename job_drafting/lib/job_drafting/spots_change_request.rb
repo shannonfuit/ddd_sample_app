@@ -13,7 +13,7 @@ module JobDrafting
       @job_uuid = nil
       @current_spots = nil
       @requested_spots = nil
-      @max_spots = nil
+      @minimum_required_spots = nil
     end
 
     def submit(job_uuid:, current_spots:, requested_spots:)
@@ -43,7 +43,7 @@ module JobDrafting
       )
     end
 
-    def reject(max_spots:)
+    def reject(minimum_required_spots:)
       raise NotPending unless @state == :pending
 
       apply SpotsChangeRequestRejected.new(
@@ -51,7 +51,7 @@ module JobDrafting
           spots_change_request_uuid: @uuid,
           job_uuid: @job_uuid,
           spots_before_change: @current_spots,
-          spots_after_change: max_spots,
+          spots_after_change: minimum_required_spots,
           requested_spots: @requested_spots
         }
       )
@@ -71,8 +71,8 @@ module JobDrafting
 
     on SpotsChangeRequestRejected do |event|
       @state = :rejected
-      @current_spots = event.data[:max_spots]
-      @max_spots = event.data[:max_spots]
+      @current_spots = event.data[:minimum_required_spots]
+      @minimum_required_spots = event.data[:minimum_required_spots]
     end
 
     def new?

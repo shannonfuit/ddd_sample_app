@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JobDrafting
-  class SpotsChangeRequests < Infra::Repository
+  class SpotsChangeRequests < Infra::AggregateRootRepository
     def with_spots_change_request(uuid, &)
       with_aggregate(SpotsChangeRequest.new(uuid), stream_name(uuid), &)
     end

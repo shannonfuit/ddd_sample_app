@@ -16,6 +16,11 @@ module JobDrafting
     attribute :job_uuid, Infra::Types::UUID
   end
 
+  class SetSpotsOnJob < Infra::Command
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :spots, Infra::Types::Spots
+  end
+
   class SubmitSpotsChangeRequest < Infra::Command
     attribute :spots_change_request_uuid, Infra::Types::UUID
     attribute :job_uuid, Infra::Types::UUID
@@ -29,6 +34,6 @@ module JobDrafting
 
   class RejectSpotsChangeRequest < Infra::Command
     attribute :spots_change_request_uuid, Infra::Types::UUID
-    attribute :max_spots, Infra::Types::Spots
+    attribute :minimum_required_spots, Infra::Types::Spots
   end
 end

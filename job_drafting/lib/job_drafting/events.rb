@@ -6,7 +6,7 @@ module JobDrafting
     attribute :shift, Shift.type
   end
 
-  class SpotsSetObJob < Infra::Event
+  class SpotsSetOnJob < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
     attribute :spots, Infra::Types::Spots
   end

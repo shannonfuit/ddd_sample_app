@@ -50,7 +50,7 @@ module JobDrafting
     end
 
     def spots_set_event
-      SpotsSetObJob.new(
+      SpotsSetOnJob.new(
         data: { job_uuid: @job_uuid, spots: 1 }
       )
     end

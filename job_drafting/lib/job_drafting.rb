@@ -11,6 +11,7 @@ module JobDrafting
       # register job commands
       command_bus.register(PublishJob, OnPublishJob.new)
       command_bus.register(UnpublishJob, OnUnpublishJob.new)
+      command_bus.register(SetSpotsOnJob, OnSetSpotsOnJob.new)
 
       # register change request commands
       command_bus.register(SubmitSpotsChangeRequest, OnSubmitSpotsChangeRequest.new)

@@ -29,6 +29,14 @@ module JobDrafting
     end
   end
 
+  class OnSetSpotsOnJob < JobCommandHandler
+    def call(command)
+      repository.with_job(command.job_uuid) do |job|
+        job.set_spots(command.spots)
+      end
+    end
+  end
+
   class OnUnpublishJob < JobCommandHandler
     def call(command)
       repository.with_job(command.job_uuid, &:unpublish)
@@ -57,7 +65,7 @@ module JobDrafting
   class OnRejectSpotsChangeRequest < ChangeRequestHandler
     def call(command)
       repository.with_spots_change_request(command.spots_change_request_uuid) do |request|
-        request.reject(max_spots: command.max_spots)
+        request.reject(minimum_required_spots: command.minimum_required_spots)
       end
     end
   end

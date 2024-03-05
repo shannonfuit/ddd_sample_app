@@ -28,7 +28,7 @@ module JobDrafting
     def set_spots(spots)
       return if @spots == spots
 
-      apply SpotsSetObJob.new(data: { job_uuid: @uuid, spots: })
+      apply SpotsSetOnJob.new(data: { job_uuid: @uuid, spots: })
     end
 
     def set_vacancy(vacancy)
@@ -78,7 +78,7 @@ module JobDrafting
       @shift = Shift.new(**event.data.fetch(:shift))
     end
 
-    on SpotsSetObJob do |event|
+    on SpotsSetOnJob do |event|
       @spots = event.data.fetch(:spots)
     end
 

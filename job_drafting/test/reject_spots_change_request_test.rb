@@ -34,7 +34,7 @@ module JobDrafting
       RejectSpotsChangeRequest.new(
         spots_change_request_uuid: @spots_change_request_uuid,
         job_uuid: @job_uuid,
-        max_spots: 2
+        minimum_required_spots: 2
       )
     end
 

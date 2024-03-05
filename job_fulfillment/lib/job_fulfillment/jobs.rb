@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JobFulfillment
-  class Jobs < Infra::Repository
+  class Jobs < Infra::AggregateRootRepository
     def with_job(uuid, &)
       with_aggregate(Job.new(uuid), stream_name(uuid), &)
     end

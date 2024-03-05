@@ -30,19 +30,19 @@ module JobFulfillment
     end
 
     def change_spots(requested_spots:)
-      if @applications.accepted_count > requested_spots
-        apply SpotsChangedToRequestedAmount.new(
+      if @applications.accepted_count <= requested_spots
+        apply SpotsChangedAsRequested.new(
           data: {
             job_uuid: @uuid,
-            spots: @applications.accepted_count,
+            spots: requested_spots,
             available_spots: requested_spots - @applications.accepted_count
           }
         )
       else
-        apply SpotsChangedToAcceptedAmount.new(
+        apply SpotsChangedToMinimumRequired.new(
           data: {
             job_uuid: @uuid,
-            spots: requested_spots,
+            spots: @applications.accepted_count,
             available_spots: 0
           }
         )
@@ -117,6 +117,16 @@ module JobFulfillment
       @available_spots = event.data.fetch(:spots)
     end
 
+    on SpotsChangedAsRequested do |event|
+      @spots = event.data.fetch(:spots)
+      @available_spots = event.data.fetch(:available_spots)
+    end
+
+    on SpotsChangedToMinimumRequired do |event|
+      @spots = event.data.fetch(:spots)
+      @available_spots = event.data.fetch(:available_spots)
+    end
+
     on CandidateApplied do |event|
       @applications << Application.new(
         uuid: event.data.fetch(:application_uuid),
@@ -139,16 +149,6 @@ module JobFulfillment
       application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.accept
       @available_spots = - 1
-    end
-
-    on SpotsChangedToRequestedAmount do |event|
-      @spots = event.data.fetch(:spots)
-      @available_spots = event.data.fetch(:spots)
-    end
-
-    on SpotsChangedToAcceptedAmount do |event|
-      @spots = event.data.fetch(:spots)
-      @available_spots = event.data.fetch(:available_spots)
     end
 
     def validate_can_apply(application)
