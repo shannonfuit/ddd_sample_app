@@ -3,6 +3,7 @@
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 require 'rails/test_help'
+require 'database_cleaner'
 
 module ActiveSupport
   class TestCase
@@ -12,6 +13,15 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
-    # Add more helper methods to be used by all tests here...
+    # Setup DatabaseCleaner to use transactions by default
+    setup do
+      DatabaseCleaner.strategy = :transaction
+      DatabaseCleaner.start
+    end
+
+    # Clean up the database after each test
+    teardown do
+      DatabaseCleaner.clean
+    end
   end
 end

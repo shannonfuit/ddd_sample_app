@@ -13,9 +13,9 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root 'posts#index'
-  namespace :internal do
-    resources :animals, only: %i[index show new create]
+  namespace :customer do
+    resources :jobs, only: %i[index show new create]
 
-    root 'animals#index'
+    root 'jobs#index'
   end
 end

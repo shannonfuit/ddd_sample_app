@@ -13,8 +13,8 @@ module JobDrafting
 
     test 'a change request is rejected' do
       expected_events = [spots_change_request_rejected_event]
-      published = act(@stream, reject_spots_change_request_command)
-      assert_changes(published, expected_events)
+      published_events = act(@stream, reject_spots_change_request_command)
+      assert_changes(published_events, expected_events)
     end
 
     test 'raises when change request is already rejected' do
