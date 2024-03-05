@@ -8,7 +8,7 @@ Rails.configuration.to_prepare do
   # We choose for a JSON client, because we store data in postgres as jsonb,
   # By default  RailsEventStore::Client will use YAML
   event_store = Infra::EventStore.main
-  command_bus = Infra::CommandBus.new
+  command_bus = Infra::CommandBus.main
 
   # Configure Rails.configuration
   Rails.configuration.command_bus = command_bus
@@ -23,10 +23,12 @@ Rails.configuration.to_prepare do
   Demo::Configuration.new.call(event_store, command_bus)
 
   # Configure processes
-  # Processes::Configuration.new.call(event_store, command_bus)
+  unless Rails.env.test?
+    Processes::Configuration.new.call(event_store, command_bus)
+    Customer::Configuration.new.call(event_store)
+  end
 
   # Configure read models
-  Customer::Configuration.new.call(event_store)
 
   # For debugging purposes
   event_store.tap do |store|

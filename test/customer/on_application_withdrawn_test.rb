@@ -3,7 +3,7 @@
 require 'test_helper'
 
 module Customer
-  class OnApplicationWithdrawnTest < ActiveSupport::TestCase
+  class OnApplicationWithdrawnTest < Infra::ReadModelTestHelper
     # include TestHelpers::Integration
 
     setup do
@@ -16,7 +16,7 @@ module Customer
     end
 
     test 'withdraw an application from the job' do
-      Rails.configuration.event_store.publish(application_withdrawn_event)
+      event_store.publish(application_withdrawn_event)
       assert_equal(
         [{
           uuid: @application_uuid,

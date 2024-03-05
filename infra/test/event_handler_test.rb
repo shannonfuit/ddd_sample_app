@@ -17,8 +17,6 @@ module Infra
     def setup
       @event = MyEvent.new
       @handler = MyEventHandler.new
-      # Rails.configuration.event_store.subscribe(MyEventHandler.new, to: [MyEvent])
-      # Rails.configuration.event_store.publish(@event)
     end
 
     test 'call' do

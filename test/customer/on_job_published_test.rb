@@ -3,16 +3,14 @@
 require 'test_helper'
 
 module Customer
-  class OnJobPublishedTest < ActiveSupport::TestCase
-    # include TestHelpers::Integration
-
+  class OnJobPublishedTest < Infra::ReadModelTestHelper
     setup do
       @job_uuid = SecureRandom.uuid
       @shift_duration = { starts_on: 1.day.from_now, ends_on: 2.days.from_now }
     end
 
     test 'creating a job that does not exist' do
-      Rails.configuration.event_store.publish(job_published_event)
+      event_store.publish(job_published_event)
 
       assert_equal(1, Job.count)
       assert_equal(

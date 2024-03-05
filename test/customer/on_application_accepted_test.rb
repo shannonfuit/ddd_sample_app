@@ -3,9 +3,7 @@
 require 'test_helper'
 
 module Customer
-  class OnApplicationAcceptedTest < ActiveSupport::TestCase
-    # include TestHelpers::Integration
-
+  class OnApplicationAcceptedTest < Infra::ReadModelTestHelper
     setup do
       @job_uuid = SecureRandom.uuid
       @application_uuid = SecureRandom.uuid
@@ -15,18 +13,11 @@ module Customer
     end
 
     test 'accepts the application on the job' do
-      Rails.configuration.event_store.publish(application_accepted_event)
+      handle(application_accepted_event)
       assert_equal(
-        [{
-          uuid: @application_uuid,
-          status: 'accepted'
-        }],
+        [{ uuid: @application_uuid, status: 'accepted' }],
         job_applications
       )
-    end
-
-    def job_applications
-      Job.find_by(uuid: @job_uuid).applications.map(&:deep_symbolize_keys)
     end
 
     test 'when duplicated' do
@@ -34,10 +25,7 @@ module Customer
       Customer::JobEventHandlers::OnApplicationAccepted.new.call(application_accepted_event)
 
       assert_equal(
-        [{
-          uuid: @application_uuid,
-          status: 'accepted'
-        }],
+        [{ uuid: @application_uuid, status: 'accepted' }],
         job_applications
       )
     end
@@ -50,6 +38,10 @@ module Customer
           application_uuid: @application_uuid
         }
       )
+    end
+
+    def job_applications
+      Job.find_by(uuid: @job_uuid).applications.map(&:deep_symbolize_keys)
     end
   end
 end

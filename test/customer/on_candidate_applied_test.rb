@@ -3,7 +3,7 @@
 require 'test_helper'
 
 module Customer
-  class OnCandidateAppliedTest < ActiveSupport::TestCase
+  class OnCandidateAppliedTest < Infra::ReadModelTestHelper
     # include TestHelpers::Integration
 
     setup do
@@ -17,7 +17,7 @@ module Customer
     end
 
     test 'adding an application to the job' do
-      Rails.configuration.event_store.publish(candidate_applied_event)
+      event_store.publish(candidate_applied_event)
       assert_equal(
         [{
           uuid: @application_uuid,

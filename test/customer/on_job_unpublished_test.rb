@@ -3,7 +3,7 @@
 require 'test_helper'
 
 module Customer
-  class OnJobUnpublishedTest < ActiveSupport::TestCase
+  class OnJobUnpublishedTest < Infra::ReadModelTestHelper
     # include TestHelpers::Integration
 
     setup do
@@ -12,7 +12,7 @@ module Customer
     end
 
     test 'creating a job that does not exist' do
-      Rails.configuration.event_store.publish(job_unpublished_event)
+      event_store.publish(job_unpublished_event)
       assert_equal(
         {
           uuid: @job_uuid,

@@ -3,7 +3,7 @@
 require 'test_helper'
 
 module Customer
-  class OnApplicationRejectedTest < ActiveSupport::TestCase
+  class OnApplicationRejectedTest < Infra::ReadModelTestHelper
     # include TestHelpers::Integration
 
     setup do
@@ -15,7 +15,7 @@ module Customer
     end
 
     test 'rejects the application on the job' do
-      Rails.configuration.event_store.publish(application_rejected_event)
+      event_store.publish(application_rejected_event)
       assert_equal(
         [{
           uuid: @application_uuid,
