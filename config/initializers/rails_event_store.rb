@@ -7,51 +7,59 @@ require 'arkency/command_bus'
 Rails.configuration.to_prepare do
   # We choose for a JSON client, because we store data in postgres as jsonb,
   # By default  RailsEventStore::Client will use YAML
-  event_store = RailsEventStore::JSONClient.new(
-    dispatcher: RubyEventStore::ComposedDispatcher.new(
-      RailsEventStore::AfterCommitAsyncDispatcher.new(
-        scheduler: RailsEventStore::ActiveJobScheduler.new(serializer: JSON)
-      ),
-      RubyEventStore::Dispatcher.new
-    )
-  )
-  command_bus = Arkency::CommandBus.new
+  event_store = Infra::EventStore.main
+  command_bus = Infra::CommandBus.new
 
+  # Configure Rails.configuration
   Rails.configuration.command_bus = command_bus
   Rails.configuration.event_store = event_store
+
+  # Configure aggregate root
   AggregateRoot.configure { |config| config.default_event_store = event_store }
 
+  # Configure domain
   JobFulfillment::Configuration.new.call(event_store, command_bus)
   JobDrafting::Configuration.new.call(event_store, command_bus)
   Demo::Configuration.new.call(event_store, command_bus)
 
+  # Configure processes
+  # Processes::Configuration.new.call(event_store, command_bus)
+
+  # Configure read models
   Customer::Configuration.new.call(event_store)
 
+  # For debugging purposes
   event_store.tap do |store|
     store.subscribe_to_all_events(RailsEventStore::LinkByEventType.new)
     store.subscribe_to_all_events(RailsEventStore::LinkByCorrelationId.new)
     store.subscribe_to_all_events(RailsEventStore::LinkByCausationId.new)
   end
+
+  #  Samples:
+  #
   #  Event Handlers
   #  Subscribe asynchroniously:
-  #  store.subscribe(Animals::OnAnimalRegistered, to: [Administrating::AnimalRegistered])
+  #  store.subscribe(JobDrafting::OnJobPublished, to: [JobDrafting::JobPublished])
   #
   #  Subscribe synchroniously (this single instance is used to process all eevents, so keep it stateless)
-  #  store.subscribe(Animals::OnAnimalRegistered.new, to: [Administrating::AnimalRegistered])
+  #  store.subscribe(JobDrafting::OnJobPublished.new, to: [JobDrafting::JobPublished])
+  #
   #  Subscribe synchroniously (a new instance to process each event) - don't inherit your Handler from ActiveJob
-  #  store.subscribe(Animals::OnAnimalRegistered, to: [Administrating::AnimalRegistered])
+  #  store.subscribe(JobDrafting::OnJobPublished, to: [JobDrafting::JobPublished])
   #
   #  Specify another method than `call` (Sync only)
-  #  store.subscribe( ->(event){ Animals::OnAnimalRegistered.new.foo(event) }, to: [Administrating::AnimalRegistered])
+  #  store.subscribe( -(event)){ JobDrafting::OnJobPublished.new.foo(event) }, to: [JobDrafting::JobPublished]
+  #
   #  Subscribe to all events:
-  #  store.subscribe_to_all_events(Animals::OnAnyEvent) # Async
-  #  store.subscribe_to_all_events(Animals::OnAnyEvent.new) # Sync
+  #  store.subscribe_to_all_events(Customer::OnAnyEvent)
+  #  store.subscribe_to_all_events(Customer::OnAnyEvent) # Async
+  #  store.subscribe_to_all_events(Customer::OnAnyEvent.new) # Sync
   #
   #
   #  Command handlers
   #  This handler will be initialized once, make sure it is stateless
-  #  command_bus.register(JobDrafting::DraftJob, JobDrafting::OnDraftJob.new(event_store))
+  #  command_bus.register(JobDrafting::PublishJob, JobDrafting::OnPublishJob.new(event_store))
   #
   #  This handler will be initialized once per each call, in case each handler needs its own state
-  #  command_bus.register(JobDrafting::DraftJob, ->(cmd) { JobDrafting::OnDraftJob.new(event_store).call(cmd) })
+  #  command_bus.register(JobDrafting::PublishJob, ->(cmd) { JobDrafting::OnPublishJob.new(event_store).call(cmd) })
 end

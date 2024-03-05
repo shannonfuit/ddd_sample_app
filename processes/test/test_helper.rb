@@ -4,15 +4,10 @@ require_relative '../lib/processes'
 
 module Processes
   class Test < ActiveSupport::TestCase
-    # include Infra::TestPlumbing.with(
-    #   event_store: -> { Infra::EventStore.in_memory },
-    #   command_bus: -> { FakeCommandBus.new }
-    # )
-
     def before_setup
       super
       @command_bus = FakeCommandBus.new
-      @event_store = Rails.configuration.event_store
+      @event_store = Infra::EventStore.main
       Configuration.new.call(event_store, command_bus)
     end
 
