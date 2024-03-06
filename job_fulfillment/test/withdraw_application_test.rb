@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require_relative 'test_helper'
 
 module JobFulfillment
-  class WithdrawApplicationTest < Infra::DomainTestHelper
+  class WithdrawApplicationTest < DomainTest
     def setup
       @uuid = SecureRandom.uuid
       @application_uuid = SecureRandom.uuid
@@ -18,14 +18,14 @@ module JobFulfillment
       expected_events = [application_withdrawn_event]
       published = act(@stream, withdraw_application_command)
 
-      assert_changes(published, expected_events)
+      assert_events(published, expected_events)
     end
 
     test 'no event gets published when a candidate is already withdrawn' do
       arrange_candidate_applied
       arrange(@stream, [application_withdrawn_event])
       published = act(@stream, withdraw_application_command)
-      assert_no_changes(published)
+      assert_no_events(published)
     end
 
     test 'it raises when an application is not found' do

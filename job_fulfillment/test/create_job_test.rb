@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require_relative 'test_helper'
 
 module JobFulfillment
-  class CreateJobTest < Infra::DomainTestHelper
+  class CreateJobTest < DomainTest
     def setup
       @job_uuid = SecureRandom.uuid
       @starts_on = 1.day.from_now
@@ -15,14 +15,13 @@ module JobFulfillment
       published = act(@stream, create_job_command)
       expected_events = [job_created_event]
 
-      assert_changes(published, expected_events)
+      assert_events(published, expected_events)
     end
 
     test 'a job can only be created once' do
       job_created = job_created_event
       create_job = create_job_command
       arrange(@stream, [job_created])
-
       assert_raises(Job::HasAlreadyBeenCreated) { act(@stream, create_job) }
     end
 

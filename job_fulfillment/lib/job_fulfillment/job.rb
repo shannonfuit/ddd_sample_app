@@ -7,6 +7,9 @@ module JobFulfillment
     class HasAlreadApplied < StandardError; end
     class ApplicationNotFound < StandardError; end
     class ApplicationNotPending < StandardError; end
+    class NoSpotsAvailable < StandardError; end
+    class JobNotOpen < StandardError; end
+    class CannotReapply < StandardError; end
 
     def initialize(uuid)
       @uuid = uuid
@@ -18,7 +21,7 @@ module JobFulfillment
     end
 
     def create(starts_on:, spots:)
-      raise HasAlreadyBeenCreated if @state == :created
+      raise HasAlreadyBeenCreated unless new?
 
       apply JobCreated.new(
         data: {
@@ -111,7 +114,7 @@ module JobFulfillment
     private
 
     on JobCreated do |event|
-      @state = :created
+      @state = :open
       @starts_on = event.data.fetch(:starts_on)
       @spots = event.data.fetch(:spots)
       @available_spots = event.data.fetch(:spots)
@@ -148,7 +151,7 @@ module JobFulfillment
     on ApplicationAccepted do |event|
       application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
       application.accept
-      @available_spots = - 1
+      @available_spots -= 1
     end
 
     def validate_can_apply(application)
@@ -177,11 +180,19 @@ module JobFulfillment
     end
 
     def validate_job_open
-      raise JobNotOpen unless @state == :created && @starts_on.future?
+      raise JobNotOpen unless open? && @starts_on.future?
     end
 
     def validate_available_spots
-      raise NoSpotsAvailable if @available_spots.zero?
+      raise NoSpotsAvailable if @spots <= @applications.accepted_count
+    end
+
+    def new?
+      @state == :new
+    end
+
+    def open?
+      @state == :open
     end
   end
 end

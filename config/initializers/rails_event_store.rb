@@ -14,21 +14,22 @@ Rails.configuration.to_prepare do
   Rails.configuration.command_bus = command_bus
   Rails.configuration.event_store = event_store
 
-  # Configure aggregate root
-  AggregateRoot.configure { |config| config.default_event_store = event_store }
-
-  # Configure domain
-  JobFulfillment::Configuration.new.call(event_store, command_bus)
-  JobDrafting::Configuration.new.call(event_store, command_bus)
-  Demo::Configuration.new.call(event_store, command_bus)
-
-  # Configure processes
+  # This is configured in the test_helpers of the bounded contexts
   unless Rails.env.test?
-    Processes::Configuration.new.call(event_store, command_bus)
-    Customer::Configuration.new.call(event_store)
-  end
+    # Configure aggregate root
+    AggregateRoot.configure { |config| config.default_event_store = event_store }
 
-  # Configure read models
+    # Configure domain
+    JobDrafting.configure(command_bus, event_store)
+    JobFulfillment.configure(command_bus, event_store)
+    Demo.configure(command_bus, event_store)
+
+    # Configure processes
+    Processes.configure(command_bus, event_store)
+
+    # Configure read models
+    Customer.configure(event_store)
+  end
 
   # For debugging purposes
   event_store.tap do |store|

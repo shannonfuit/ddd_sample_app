@@ -3,7 +3,7 @@
 module JobDrafting
   class ShiftSetOnJob < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
-    attribute :shift, Shift.type
+    attribute :shift, Shift.typed_value
   end
 
   class SpotsSetOnJob < Infra::Event
@@ -13,7 +13,7 @@ module JobDrafting
 
   class VacancySetObJob < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
-    attribute :vacancy, Vacancy.type
+    attribute :vacancy, Vacancy.typed_value
   end
 
   class WagePerHourSetOnJob < Infra::Event

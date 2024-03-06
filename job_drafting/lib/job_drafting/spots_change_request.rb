@@ -17,6 +17,7 @@ module JobDrafting
     end
 
     def submit(job_uuid:, current_spots:, requested_spots:)
+      puts '##### SpotsChangeRequest: submit'
       raise AlreadySubmitted unless new?
 
       apply SpotsChangeRequestSubmitted.new(
@@ -30,7 +31,8 @@ module JobDrafting
     end
 
     def accept
-      raise NotPending unless @state == :pending
+      puts '##### SpotsChangeRequest: accept'
+      raise NotPending unless pending?
 
       apply SpotsChangeRequestAccepted.new(
         data: {
@@ -44,7 +46,8 @@ module JobDrafting
     end
 
     def reject(minimum_required_spots:)
-      raise NotPending unless @state == :pending
+      puts '##### SpotsChangeRequest: reject'
+      raise NotPending unless pending?
 
       apply SpotsChangeRequestRejected.new(
         data: {

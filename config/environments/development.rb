@@ -56,7 +56,9 @@ Rails.application.configure do
   config.active_record.migration_error = :page_load
 
   # Highlight code that triggered database queries in logs.
-  config.active_record.verbose_query_logs = true
+  # TODO: enable again
+  config.active_record.verbose_query_logs = false
+  config.log_level = :warn
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true

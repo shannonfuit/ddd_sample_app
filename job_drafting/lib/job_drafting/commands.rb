@@ -16,7 +16,7 @@ module JobDrafting
     attribute :job_uuid, Infra::Types::UUID
   end
 
-  class SetSpotsOnJob < Infra::Command
+  class ChangeSpots < Infra::Command
     attribute :job_uuid, Infra::Types::UUID
     attribute :spots, Infra::Types::Spots
   end

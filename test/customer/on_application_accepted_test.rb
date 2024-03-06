@@ -13,7 +13,7 @@ module Customer
     end
 
     test 'accepts the application on the job' do
-      handle(application_accepted_event)
+      event_store.publish(application_accepted_event)
       assert_equal(
         [{ uuid: @application_uuid, status: 'accepted' }],
         job_applications

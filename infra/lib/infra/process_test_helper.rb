@@ -4,14 +4,13 @@ module Infra
   class ProcessTestHelper < ActiveSupport::TestCase
     include ActiveJob::TestHelper
 
+    attr_reader :event_store, :command_bus
+
     def before_setup
       super
       @command_bus = Infra::CommandBus.fake
-      @event_store = Infra::Rails.main
-      Processes::Configuration.new.call(event_store, command_bus)
+      @event_store = Infra::EventStore.in_memory
     end
-
-    attr_reader :event_store, :command_bus
 
     private
 

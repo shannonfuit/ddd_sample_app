@@ -29,7 +29,7 @@ module JobDrafting
     end
   end
 
-  class OnSetSpotsOnJob < JobCommandHandler
+  class OnChangeSpots < JobCommandHandler
     def call(command)
       repository.with_job(command.job_uuid) do |job|
         job.set_spots(command.spots)

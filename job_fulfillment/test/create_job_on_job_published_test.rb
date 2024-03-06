@@ -1,26 +1,25 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require_relative 'test_helper'
 
 module JobFulfillment
-  class CreateJobOnJobPublishedTest < Infra::DomainTestHelper
+  class CreateJobOnJobPublishedTest < ProcessTest
     def setup
       @job_uuid = SecureRandom.uuid
       @starts_on = 1.day.from_now
       @spots = 1
-      @stream = "JobFulfillment::Job$#{@job_uuid}"
+      @event_handler = CreateJobOnJobPublished.new(event_store:, command_bus:)
     end
 
     test 'a job is created' do
-      published = handle_event(@stream, job_published_event)
-      expected_events = [job_created_event]
+      given([job_published]).each { |event| @event_handler.call(event) }
 
-      assert_changes(published, expected_events)
+      assert_command(create_job)
     end
 
     private
 
-    def job_published_event
+    def job_published
       JobDrafting::JobPublished.new(
         data: {
           job_uuid: @job_uuid,
@@ -38,13 +37,11 @@ module JobFulfillment
       )
     end
 
-    def job_created_event
-      JobCreated.new(
-        data: {
-          job_uuid: @job_uuid,
-          starts_on: @starts_on,
-          spots: @spots
-        }
+    def create_job
+      JobFulfillment::CreateJob.new(
+        job_uuid: @job_uuid,
+        starts_on: @starts_on,
+        spots: @spots
       )
     end
   end

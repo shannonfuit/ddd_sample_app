@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require_relative 'test_helper'
 
 module JobDrafting
-  class RejectSpotsChangedRequestTest < Infra::DomainTestHelper
+  class RejectSpotsChangedRequestTest < DomainTest
     def setup
       @spots_change_request_uuid = SecureRandom.uuid
       @job_uuid = SecureRandom.uuid
@@ -12,25 +12,27 @@ module JobDrafting
     end
 
     test 'a change request is rejected' do
-      expected_events = [spots_change_request_rejected_event]
-      published_events = act(@stream, reject_spots_change_request_command)
-      assert_changes(published_events, expected_events)
+      expected_events = [spots_change_request_rejected]
+      published_events = act(@stream, reject_spots_change_request)
+
+      assert_events(expected_events, published_events)
     end
 
     test 'raises when change request is already rejected' do
       arrange_change_request_rejected
+
       assert_raises(SpotsChangeRequest::NotPending) do
-        act(@stream, reject_spots_change_request_command)
+        act(@stream, reject_spots_change_request)
       end
     end
 
     test 'it validates the input of the command' do
       assert_raises(Infra::Command::Invalid) do
-        invalid_reject_change_request_command
+        invalid_reject_change_request
       end
     end
 
-    def reject_spots_change_request_command
+    def reject_spots_change_request
       RejectSpotsChangeRequest.new(
         spots_change_request_uuid: @spots_change_request_uuid,
         job_uuid: @job_uuid,
@@ -38,7 +40,7 @@ module JobDrafting
       )
     end
 
-    def spots_change_request_rejected_event
+    def spots_change_request_rejected
       SpotsChangeRequestRejected.new(
         data: {
           spots_change_request_uuid: @spots_change_request_uuid,
@@ -50,7 +52,7 @@ module JobDrafting
       )
     end
 
-    def spots_change_request_submitted_event
+    def spots_change_request_submitted
       SpotsChangeRequestSubmitted.new(
         data: {
           spots_change_request_uuid: @spots_change_request_uuid,
@@ -62,14 +64,14 @@ module JobDrafting
     end
 
     def arrange_change_request_submitted
-      arrange(@stream, [spots_change_request_submitted_event])
+      arrange(@stream, [spots_change_request_submitted])
     end
 
     def arrange_change_request_rejected
-      arrange(@stream, [spots_change_request_rejected_event])
+      arrange(@stream, [spots_change_request_rejected])
     end
 
-    def invalid_reject_change_request_command
+    def invalid_reject_change_request
       RejectSpotsChangeRequest.new
     end
   end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require_relative 'test_helper'
 
 module JobFulfillment
-  class ChangeSpotsTest < Infra::DomainTestHelper
+  class ChangeSpotsTest < DomainTest
     def setup
       @job_uuid = SecureRandom.uuid
       @stream = "JobFulfillment::Job$#{@job_uuid}"
@@ -20,7 +20,7 @@ module JobFulfillment
       published = act(@stream, change_spots_command)
       expected_events = [spots_changed_as_requested_event]
 
-      assert_changes(published, expected_events)
+      assert_events(published, expected_events)
     end
 
     test 'the number of spots is changed to the minimum required amount' do
@@ -28,7 +28,7 @@ module JobFulfillment
       published = act(@stream, change_spots_command)
       expected_events = [spots_changed_to_minimum_required_event]
 
-      assert_changes(published, expected_events)
+      assert_events(published, expected_events)
     end
 
     test 'it validates the input of the command' do
