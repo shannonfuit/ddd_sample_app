@@ -4,52 +4,116 @@ require_relative 'test_helper'
 
 module JobFulfillment
   class WithdrawApplicationTest < DomainTest
-    def setup
-      @uuid = SecureRandom.uuid
-      @application_uuid = SecureRandom.uuid
-      @stream = "JobFulfillment::Job$#{@uuid}"
-      @candidate_uuid = SecureRandom.uuid
-
-      arrange_setup_for_test
-    end
-
     test 'an application gets withdrawn' do
       arrange_candidate_applied
-      expected_events = [application_withdrawn_event]
-      published = act(@stream, withdraw_application_command)
+
+      expected_events = [application_withdrawn]
+      published = act(@stream, withdraw_application)
 
       assert_events(published, expected_events)
     end
 
     test 'no event gets published when a candidate is already withdrawn' do
-      arrange_candidate_applied
-      arrange(@stream, [application_withdrawn_event])
-      published = act(@stream, withdraw_application_command)
+      arrange_candidate_withdrawn
+
+      published = act(@stream, withdraw_application)
       assert_no_events(published)
     end
 
     test 'it raises when an application is not found' do
-      assert_raises(Job::ApplicationNotFound) do
-        act(@stream, withdraw_application_command)
+      arrange_job_opened
+      publish_candidate_registered
+
+      assert_raises(Application::NotFound) do
+        act(@stream, withdraw_application)
       end
     end
 
     test 'it raises when the application is not pending' do
-      arrange_candidate_accepted
-      assert_raises(Job::ApplicationNotPending) do
-        act(@stream, withdraw_application_command)
+      arrange_application_accepted
+
+      assert_raises(Application::NotPending) do
+        act(@stream, withdraw_application)
       end
     end
 
     test 'it validates the input of the command' do
       assert_raises(Infra::Command::Invalid) do
-        invalid_withdraw_application_command
+        invalid_withdraw_application
+      end
+    end
+
+    test 'it requires the candidate to be registered' do
+      arrange_setup_without_candidate_registered
+
+      assert_raises(Shared::UserRegistry::UserNotFound) do
+        act(@stream, withdraw_application)
       end
     end
 
     private
 
-    def application_withdrawn_event
+    # commands
+    def withdraw_application
+      WithdrawApplication.new(
+        job_uuid: @uuid,
+        application_uuid: @application_uuid,
+        candidate_uuid: @candidate_uuid
+      )
+    end
+
+    def invalid_withdraw_application
+      WithdrawApplication.new(job_uuid: @uuid)
+    end
+
+    # build aggregate
+    def arrange_candidate_applied
+      arrange_job_opened
+      publish_candidate_registered
+      arrange(@stream, [candidate_applied])
+    end
+
+    def arrange_application_accepted
+      arrange_job_opened
+      publish_candidate_registered
+      arrange(@stream, [candidate_applied, application_accepted])
+    end
+
+    def arrange_candidate_withdrawn
+      arrange_job_opened
+      publish_candidate_registered
+      arrange(@stream, [candidate_applied, application_withdrawn])
+    end
+
+    def arrange_setup_without_candidate_registered
+      arrange_job_opened
+    end
+
+    # events
+    def candidate_applied
+      CandidateApplied.new(
+        data:
+        {
+          job_uuid: @uuid,
+          application_uuid: @application_uuid,
+          candidate_uuid: @candidate_uuid,
+          motivation: 'I want to work here'
+        }
+      )
+    end
+
+    def application_accepted
+      ApplicationAccepted.new(
+        data:
+        {
+          job_uuid: @uuid,
+          application_uuid: @application_uuid,
+          contact_uuid: @contact_uuid
+        }
+      )
+    end
+
+    def application_withdrawn
       ApplicationWithdrawn.new(
         data:
         {
@@ -58,56 +122,6 @@ module JobFulfillment
           candidate_uuid: @candidate_uuid
         }
       )
-    end
-
-    def arrange_candidate_applied
-      candidate_applied_event = CandidateApplied.new(
-        data:
-        {
-          job_uuid: @uuid,
-          application_uuid: @application_uuid,
-          candidate_uuid: @candidate_uuid,
-          motivation: @motivation
-        }
-      )
-      arrange(@stream, [candidate_applied_event])
-    end
-
-    def arrange_candidate_accepted
-      arrange_candidate_applied
-
-      application_accepted_event = ApplicationAccepted.new(
-        data:
-        {
-          job_uuid: @uuid,
-          application_uuid: @application_uuid
-        }
-      )
-      arrange(@stream, [application_accepted_event])
-    end
-
-    def arrange_setup_for_test
-      job_created_event = JobCreated.new(
-        data: {
-          job_uuid: @uuid,
-          starts_on: Time.zone.now.tomorrow,
-          ends_on: Time.zone.now.tomorrow + 1.day,
-          spots: 1
-        }
-      )
-      arrange(@stream, [job_created_event])
-    end
-
-    def withdraw_application_command
-      WithdrawApplication.new(
-        job_uuid: @uuid,
-        application_uuid: @application_uuid,
-        candidate_uuid: @candidate_uuid
-      )
-    end
-
-    def invalid_withdraw_application_command
-      WithdrawApplication.new(job_uuid: @uuid)
     end
   end
 end

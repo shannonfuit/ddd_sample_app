@@ -1,22 +1,20 @@
 <!-- app/views/internal/animals/index.html.erb -->
 
-<h1>Animal List</h1>
+<h1>Job List</h1>
 
 <table>
   <thead>
     <tr>
-      <th>Registration Number</th>
-      <th>Registered By</th>
+      <th>Title</th>
     </tr>
   </thead>
   <tbody>
-    <% @animals.each do |animal| %>
+    <% @jobs.each do |job| %>
       <tr>
-        <td><%= animal.uuid %></td>
-        <td><%= animal.registered_by %></td>
+        <td><%= job.title %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%= link_to 'Register Animal', new_internal_animal_path %>
+<%= link_to 'Publish a job', new_customer_job_path %>

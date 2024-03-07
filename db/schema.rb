@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_03_192012) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_07_094859) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "contacts", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "uuid"
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_contacts_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_contacts_on_reset_password_token", unique: true
+  end
 
   create_table "customer_candidates", force: :cascade do |t|
     t.string "uuid", null: false
@@ -64,6 +77,25 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_03_192012) do
     t.index ["event_id"], name: "index_event_store_events_in_streams_on_event_id"
     t.index ["stream", "event_id"], name: "index_event_store_events_in_streams_on_stream_and_event_id", unique: true
     t.index ["stream", "position"], name: "index_event_store_events_in_streams_on_stream_and_position", unique: true
+  end
+
+  create_table "iam_users", force: :cascade do |t|
+    t.string "uuid", null: false
+    t.string "role"
+    t.string "email"
+    t.string "first_name"
+    t.string "last_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_iam_users_on_uuid", unique: true
+  end
+
+  create_table "job_fulfillment_users", force: :cascade do |t|
+    t.string "uuid", null: false
+    t.string "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_job_fulfillment_users_on_uuid", unique: true
   end
 
   create_table "my_active_record_aggregates", force: :cascade do |t|

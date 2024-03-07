@@ -20,6 +20,7 @@ Rails.configuration.to_prepare do
     AggregateRoot.configure { |config| config.default_event_store = event_store }
 
     # Configure domain
+    Iam.configure(command_bus, event_store)
     JobDrafting.configure(command_bus, event_store)
     JobFulfillment.configure(command_bus, event_store)
     Demo.configure(command_bus, event_store)
@@ -44,7 +45,7 @@ Rails.configuration.to_prepare do
   #  Subscribe asynchroniously:
   #  store.subscribe(JobDrafting::OnJobPublished, to: [JobDrafting::JobPublished])
   #
-  #  Subscribe synchroniously (this single instance is used to process all eevents, so keep it stateless)
+  #  Subscribe synchronously (this single instance is used to process all eevents, so keep it stateless)
   #  store.subscribe(JobDrafting::OnJobPublished.new, to: [JobDrafting::JobPublished])
   #
   #  Subscribe synchroniously (a new instance to process each event) - don't inherit your Handler from ActiveJob

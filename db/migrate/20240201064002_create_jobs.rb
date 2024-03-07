@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class CreateJobs < ActiveRecord::Migration[7.1]
+class OpenJobs < ActiveRecord::Migration[7.1]
   def change
     create_table :customer_jobs do |t|
       t.string :uuid, null: false, index: { unique: true }

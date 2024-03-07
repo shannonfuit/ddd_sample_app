@@ -14,10 +14,11 @@ module JobDrafting
 
     # register change request commands
     command_bus.register(SubmitSpotsChangeRequest, OnSubmitSpotsChangeRequest.new)
-    command_bus.register(AcceptSpotsChangeRequest, OnAcceptSpotsChangeRequest.new)
+    command_bus.register(ApproveSpotsChangeRequest, OnApproveSpotsChangeRequest.new)
     command_bus.register(RejectSpotsChangeRequest, OnRejectSpotsChangeRequest.new)
 
     # registering events
     event_store.subscribe(SendConfrmationMailOnJobPublished, to: [JobPublished])
+    event_store.subscribe(AddUserOnUserRegistered.new, to: [Iam::CandidateRegistered, Iam::ContactRegistered])
   end
 end

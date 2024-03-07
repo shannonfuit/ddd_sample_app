@@ -3,13 +3,10 @@
 module JobFulfillment
   class Job
     include AggregateRoot
-    class HasAlreadyBeenCreated < StandardError; end
-    class HasAlreadApplied < StandardError; end
-    class ApplicationNotFound < StandardError; end
-    class ApplicationNotPending < StandardError; end
+    class AlreadyOpen < StandardError; end
     class NoSpotsAvailable < StandardError; end
-    class JobNotOpen < StandardError; end
-    class CannotReapply < StandardError; end
+    class NotOpen < StandardError; end
+    class HasStarted < StandardError; end
 
     def initialize(uuid)
       @uuid = uuid
@@ -20,10 +17,10 @@ module JobFulfillment
       @applications = Application::Collection.new
     end
 
-    def create(starts_on:, spots:)
-      raise HasAlreadyBeenCreated unless new?
+    def open(starts_on:, spots:)
+      raise AlreadyOpen unless new?
 
-      apply JobCreated.new(
+      apply JobOpened.new(
         data: {
           job_uuid: @uuid,
           starts_on:,
@@ -32,11 +29,12 @@ module JobFulfillment
       )
     end
 
-    def change_spots(requested_spots:)
+    def change_spots(requested_spots:, change_request_uuid:)
       if @applications.accepted_count <= requested_spots
         apply SpotsChangedAsRequested.new(
           data: {
             job_uuid: @uuid,
+            change_request_uuid:,
             spots: requested_spots,
             available_spots: requested_spots - @applications.accepted_count
           }
@@ -45,6 +43,7 @@ module JobFulfillment
         apply SpotsChangedToMinimumRequired.new(
           data: {
             job_uuid: @uuid,
+            change_request_uuid:,
             spots: @applications.accepted_count,
             available_spots: 0
           }
@@ -56,7 +55,7 @@ module JobFulfillment
       application = @applications.find_by(candidate_uuid:)
       return if application&.pending?
 
-      validate_can_apply(application)
+      validate_can_apply
 
       apply CandidateApplied.new(
         data: {
@@ -69,10 +68,10 @@ module JobFulfillment
     end
 
     def withdraw_application(application_uuid:, candidate_uuid:)
-      application = @applications.find_by(uuid: application_uuid)
-      return if application&.withdrawn?
+      application = @applications.find_by!(uuid: application_uuid)
+      return if application.withdrawn?
 
-      validate_can_witdraw(application)
+      validate_can_witdraw
 
       apply ApplicationWithdrawn.new(
         data: {
@@ -83,37 +82,39 @@ module JobFulfillment
       )
     end
 
-    def accept_application(application_uuid:)
-      application = @applications.find_by(uuid: application_uuid)
-      return if application&.accepted?
+    def reject_application(application_uuid:, contact_uuid:)
+      application = @applications.find_by!(uuid: application_uuid)
+      return if application.rejected?
 
-      validate_can_accept(application)
-
-      apply ApplicationAccepted.new(
-        data: {
-          job_uuid: @uuid,
-          application_uuid:
-        }
-      )
-    end
-
-    def reject_application(application_uuid:)
-      application = @applications.find_by(uuid: application_uuid)
-      return if application&.rejected?
-
-      validate_can_reject(application)
+      validate_can_reject
 
       apply ApplicationRejected.new(
         data: {
           job_uuid: @uuid,
-          application_uuid:
+          application_uuid:,
+          contact_uuid:
+        }
+      )
+    end
+
+    def accept_application(application_uuid:, contact_uuid:)
+      application = @applications.find_by!(uuid: application_uuid)
+      return if application.accepted?
+
+      validate_can_accept
+
+      apply ApplicationAccepted.new(
+        data: {
+          job_uuid: @uuid,
+          application_uuid:,
+          contact_uuid:
         }
       )
     end
 
     private
 
-    on JobCreated do |event|
+    on JobOpened do |event|
       @state = :open
       @starts_on = event.data.fetch(:starts_on)
       @spots = event.data.fetch(:spots)
@@ -131,7 +132,7 @@ module JobFulfillment
     end
 
     on CandidateApplied do |event|
-      @applications << Application.new(
+      @applications.add_new(
         uuid: event.data.fetch(:application_uuid),
         candidate_uuid: event.data.fetch(:candidate_uuid),
         motivation: event.data.fetch(:motivation)
@@ -154,33 +155,31 @@ module JobFulfillment
       @available_spots -= 1
     end
 
-    def validate_can_apply(application)
+    def validate_can_apply
+      validate_job_not_started
       validate_job_open
       validate_available_spots
-      raise CannotReapply if application.present? && !application.pending?
     end
 
-    def validate_can_witdraw(application)
-      validate_job_open
-      raise ApplicationNotFound if application.blank?
-      raise ApplicationNotPending unless application.pending?
+    def validate_can_witdraw
+      validate_job_not_started
     end
 
-    def validate_can_accept(application)
-      validate_job_open
+    def validate_can_reject
+      validate_job_not_started
+    end
+
+    def validate_can_accept
+      validate_job_not_started
       validate_available_spots
-      raise ApplicationNotFound if application.blank?
-      raise ApplicationNotPending unless application.pending?
-    end
-
-    def validate_can_reject(application)
-      validate_job_open
-      raise ApplicationNotFound if application.blank?
-      raise ApplicationNotPending unless application.pending?
     end
 
     def validate_job_open
-      raise JobNotOpen unless open? && @starts_on.future?
+      raise NotOpen unless open?
+    end
+
+    def validate_job_not_started
+      raise HasStarted unless @starts_on.future?
     end
 
     def validate_available_spots

@@ -11,7 +11,8 @@ module ActiveSupport
     parallelize(workers: :number_of_processors)
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-    fixtures :all
+    # TODO, devise inherited fixtures break with postgresql
+    # fixtures :all
 
     # Setup DatabaseCleaner to use transactions by default
     setup do

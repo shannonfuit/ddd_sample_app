@@ -13,7 +13,7 @@ module JobDrafting
     def self.typed_value
       Infra::Types::StrictSymbolizingHash.schema(
         street: Infra::Types::NotEmpty::String,
-        house_number: Infra::Types::Integer,
+        house_number: Infra::Types::String,
         city: Infra::Types::NotEmpty::String,
         zip_code: Infra::Types::NotEmpty::String
       )

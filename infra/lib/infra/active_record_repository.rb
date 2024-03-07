@@ -5,5 +5,9 @@ module Infra
     def initialize(event_store)
       @event_store = event_store
     end
+
+    protected
+
+    attr_reader :repository
   end
 end

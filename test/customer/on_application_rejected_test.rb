@@ -10,12 +10,13 @@ module Customer
       @job_uuid = SecureRandom.uuid
       @application_uuid = SecureRandom.uuid
       @candidate_uuid = SecureRandom.uuid
+      @contact_uuid = SecureRandom.uuid
 
       Job.create(uuid: @job_uuid, status: 'published', applications: [{ uuid: @application_uuid, status: 'pending' }])
     end
 
     test 'rejects the application on the job' do
-      event_store.publish(application_rejected_event)
+      event_store.publish(application_rejected)
       assert_equal(
         [{
           uuid: @application_uuid,
@@ -30,8 +31,8 @@ module Customer
     end
 
     test 'when duplicated' do
-      Customer::JobEventHandlers::OnApplicationRejected.new.call(application_rejected_event)
-      Customer::JobEventHandlers::OnApplicationRejected.new.call(application_rejected_event)
+      Customer::JobEventHandlers::OnApplicationRejected.new.call(application_rejected)
+      Customer::JobEventHandlers::OnApplicationRejected.new.call(application_rejected)
 
       assert_equal(
         [{
@@ -42,12 +43,13 @@ module Customer
       )
     end
 
-    def application_rejected_event
+    def application_rejected
       JobFulfillment::ApplicationRejected.new(
         data:
         {
           job_uuid: @job_uuid,
-          application_uuid: @application_uuid
+          application_uuid: @application_uuid,
+          contact_uuid: @contact_uuid
         }
       )
     end

@@ -5,9 +5,10 @@ require_relative 'test_helper'
 module JobDrafting
   class RejectSpotsChangedRequestTest < DomainTest
     def setup
-      @spots_change_request_uuid = SecureRandom.uuid
+      @change_request_uuid = SecureRandom.uuid
       @job_uuid = SecureRandom.uuid
-      @stream = "JobDrafting::SpotsChangeRequest$#{@spots_change_request_uuid}"
+      @contact_uuid = SecureRandom.uuid
+      @stream = "JobDrafting::SpotsChangeRequest$#{@change_request_uuid}"
       arrange_change_request_submitted
     end
 
@@ -32,20 +33,34 @@ module JobDrafting
       end
     end
 
+    # commands
     def reject_spots_change_request
       RejectSpotsChangeRequest.new(
-        spots_change_request_uuid: @spots_change_request_uuid,
+        change_request_uuid: @change_request_uuid,
         job_uuid: @job_uuid,
         minimum_required_spots: 2
       )
     end
 
+    def invalid_reject_change_request
+      RejectSpotsChangeRequest.new
+    end
+
+    # build aggregate
+    def arrange_change_request_submitted
+      arrange(@stream, [spots_change_request_submitted])
+    end
+
+    def arrange_change_request_rejected
+      arrange(@stream, [spots_change_request_rejected])
+    end
+
+    # events
     def spots_change_request_rejected
       SpotsChangeRequestRejected.new(
         data: {
-          spots_change_request_uuid: @spots_change_request_uuid,
+          change_request_uuid: @change_request_uuid,
           job_uuid: @job_uuid,
-          spots_before_change: 3,
           spots_after_change: 2,
           requested_spots: 1
         }
@@ -55,24 +70,12 @@ module JobDrafting
     def spots_change_request_submitted
       SpotsChangeRequestSubmitted.new(
         data: {
-          spots_change_request_uuid: @spots_change_request_uuid,
+          change_request_uuid: @change_request_uuid,
           job_uuid: @job_uuid,
-          current_spots: 3,
+          contact_uuid: @contact_uuid,
           requested_spots: 1
         }
       )
-    end
-
-    def arrange_change_request_submitted
-      arrange(@stream, [spots_change_request_submitted])
-    end
-
-    def arrange_change_request_rejected
-      arrange(@stream, [spots_change_request_rejected])
-    end
-
-    def invalid_reject_change_request
-      RejectSpotsChangeRequest.new
     end
   end
 end

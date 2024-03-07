@@ -38,3 +38,7 @@ Naming/AccessorMethodName:
 
 Metrics/ClassLength:
   Enabled: false
+
+Layout/LineLength:
+  Exclude:
+    - 'config/initializers/devise.rb'

@@ -2,6 +2,10 @@
 
 module JobFulfillment
   class Application
+    NotFound = Class.new(StandardError)
+    NotPending = Class.new(StandardError)
+    AlreadySubmitted = Class.new(StandardError)
+
     class Collection < Array
       def find_by(**args)
         case args.keys.first
@@ -14,12 +18,26 @@ module JobFulfillment
         end
       end
 
+      def find_by!(**args)
+        find_by(**args) || raise(NotFound)
+      end
+
       def find_by_candidate(candidate_uuid)
         find { |app| app.candidate_uuid == candidate_uuid }
       end
 
       def find_by_uuid(uuid)
         find { |app| app.uuid == uuid }
+      end
+
+      def add_new(uuid:, candidate_uuid:, motivation:)
+        raise AlreadySubmitted if find_by(candidate_uuid:)
+
+        self << Application.new(
+          uuid:,
+          candidate_uuid:,
+          motivation:
+        )
       end
 
       def accepted_count
@@ -37,14 +55,20 @@ module JobFulfillment
     end
 
     def withdraw
+      raise NotPending unless pending?
+
       @status = :withdrawn
     end
 
     def reject
+      raise NotPending unless pending?
+
       @status = :rejected
     end
 
     def accept
+      raise NotPending unless pending?
+
       @status = :accepted
     end
 

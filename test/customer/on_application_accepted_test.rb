@@ -13,7 +13,7 @@ module Customer
     end
 
     test 'accepts the application on the job' do
-      event_store.publish(application_accepted_event)
+      event_store.publish(application_accepted)
       assert_equal(
         [{ uuid: @application_uuid, status: 'accepted' }],
         job_applications
@@ -21,8 +21,8 @@ module Customer
     end
 
     test 'when duplicated' do
-      Customer::JobEventHandlers::OnApplicationAccepted.new.call(application_accepted_event)
-      Customer::JobEventHandlers::OnApplicationAccepted.new.call(application_accepted_event)
+      Customer::JobEventHandlers::OnApplicationAccepted.new.call(application_accepted)
+      Customer::JobEventHandlers::OnApplicationAccepted.new.call(application_accepted)
 
       assert_equal(
         [{ uuid: @application_uuid, status: 'accepted' }],
@@ -30,12 +30,13 @@ module Customer
       )
     end
 
-    def application_accepted_event
+    def application_accepted
       JobFulfillment::ApplicationAccepted.new(
         data:
         {
           job_uuid: @job_uuid,
-          application_uuid: @application_uuid
+          application_uuid: @application_uuid,
+          contact_uuid: SecureRandom.uuid
         }
       )
     end

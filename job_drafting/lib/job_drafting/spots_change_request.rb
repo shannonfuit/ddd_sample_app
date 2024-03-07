@@ -11,34 +11,30 @@ module JobDrafting
       @uuid = uuid
       @state = :new
       @job_uuid = nil
-      @current_spots = nil
       @requested_spots = nil
       @minimum_required_spots = nil
     end
 
-    def submit(job_uuid:, current_spots:, requested_spots:)
-      puts '##### SpotsChangeRequest: submit'
+    def submit(job_uuid:, requested_spots:, contact_uuid:)
       raise AlreadySubmitted unless new?
 
       apply SpotsChangeRequestSubmitted.new(
         data: {
-          spots_change_request_uuid: @uuid,
+          change_request_uuid: @uuid,
+          contact_uuid:,
           job_uuid:,
-          current_spots:,
           requested_spots:
         }
       )
     end
 
-    def accept
-      puts '##### SpotsChangeRequest: accept'
+    def approve
       raise NotPending unless pending?
 
-      apply SpotsChangeRequestAccepted.new(
+      apply SpotsChangeRequestApproved.new(
         data: {
-          spots_change_request_uuid: @uuid,
+          change_request_uuid: @uuid,
           job_uuid: @job_uuid,
-          spots_before_change: @current_spots,
           spots_after_change: @requested_spots,
           requested_spots: @requested_spots
         }
@@ -46,14 +42,12 @@ module JobDrafting
     end
 
     def reject(minimum_required_spots:)
-      puts '##### SpotsChangeRequest: reject'
       raise NotPending unless pending?
 
       apply SpotsChangeRequestRejected.new(
         data: {
-          spots_change_request_uuid: @uuid,
+          change_request_uuid: @uuid,
           job_uuid: @job_uuid,
-          spots_before_change: @current_spots,
           spots_after_change: minimum_required_spots,
           requested_spots: @requested_spots
         }
@@ -63,18 +57,16 @@ module JobDrafting
     on SpotsChangeRequestSubmitted do |event|
       @state = :pending
       @job_uuid = event.data[:job_uuid]
-      @current_spots = event.data[:current_spots]
+      @contact_uuid = event.data[:contact_uuid]
       @requested_spots = event.data[:requested_spots]
     end
 
-    on SpotsChangeRequestAccepted do |_event|
-      @state = :accepted
-      @current_spots = @requested_spots
+    on SpotsChangeRequestApproved do |_event|
+      @state = :approved
     end
 
     on SpotsChangeRequestRejected do |event|
       @state = :rejected
-      @current_spots = event.data[:minimum_required_spots]
       @minimum_required_spots = event.data[:minimum_required_spots]
     end
 
@@ -86,8 +78,8 @@ module JobDrafting
       @state == :pending
     end
 
-    def accepted?
-      @state == :accepted
+    def approved?
+      @state == :approved
     end
 
     def rejected?

@@ -9,6 +9,7 @@ module JobDrafting
   class SpotsSetOnJob < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
     attribute :spots, Infra::Types::Spots
+    attribute? :change_request_uuid, Infra::Types::UUID.optional
   end
 
   class VacancySetObJob < Infra::Event
@@ -28,6 +29,7 @@ module JobDrafting
 
   class JobPublished < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
+    attribute :contact_uuid, Infra::Types::UUID
     attribute :shift, Shift.type
     attribute :spots, Infra::Types::Spots
     attribute :vacancy, Vacancy.type
@@ -39,23 +41,21 @@ module JobDrafting
   end
 
   class SpotsChangeRequestSubmitted < Infra::Event
-    attribute :spots_change_request_uuid, Infra::Types::UUID
+    attribute :change_request_uuid, Infra::Types::UUID
     attribute :job_uuid, Infra::Types::UUID
-    attribute :current_spots, Infra::Types::Spots
+    attribute :contact_uuid, Infra::Types::UUID
     attribute :requested_spots, Infra::Types::Spots
   end
 
-  class SpotsChangeRequestAccepted < Infra::Event
-    attribute :spots_change_request_uuid, Infra::Types::UUID
+  class SpotsChangeRequestApproved < Infra::Event
+    attribute :change_request_uuid, Infra::Types::UUID
     attribute :job_uuid, Infra::Types::UUID
-    attribute :spots_before_change, Infra::Types::Spots
     attribute :spots_after_change, Infra::Types::Spots
     attribute :requested_spots, Infra::Types::Spots
   end
 
   class SpotsChangeRequestRejected < Infra::Event
-    attribute :spots_change_request_uuid, Infra::Types::UUID
-    attribute :spots_before_change, Infra::Types::Spots
+    attribute :change_request_uuid, Infra::Types::UUID
     attribute :spots_after_change, Infra::Types::Spots
     attribute :requested_spots, Infra::Types::Spots
   end

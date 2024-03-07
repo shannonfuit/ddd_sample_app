@@ -25,10 +25,11 @@ module JobDrafting
       apply ShiftSetOnJob.new(data: { job_uuid: @uuid, shift: shift.value })
     end
 
-    def set_spots(spots)
+    def set_spots(spots, change_request_uuid: nil)
       return if @spots == spots
 
-      apply SpotsSetOnJob.new(data: { job_uuid: @uuid, spots: })
+      SpotsSetOnJob.new(data: { job_uuid: @uuid, spots: })
+      apply SpotsSetOnJob.new(data: { job_uuid: @uuid, spots:, change_request_uuid: })
     end
 
     def set_vacancy(vacancy)
@@ -49,13 +50,14 @@ module JobDrafting
       apply WorkLocationSetOnJob.new(data: { job_uuid: @uuid, work_location: work_location.value })
     end
 
-    def publish
+    def publish(contact_uuid)
       return if published?
       raise IncompleteDraft unless publishable?
 
       apply JobPublished.new(
         data: {
           job_uuid: @uuid,
+          contact_uuid:,
           shift: @shift.value,
           spots: @spots,
           vacancy: @vacancy.value,
@@ -94,7 +96,8 @@ module JobDrafting
       @work_location = WorkLocation.new(**event.data.fetch(:work_location))
     end
 
-    on JobPublished do |_event|
+    on JobPublished do |event|
+      @contact_uuid = event.data.fetch(:contact_uuid)
       @state = :published
     end
 

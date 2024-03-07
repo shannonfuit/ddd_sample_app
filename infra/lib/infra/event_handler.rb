@@ -2,7 +2,6 @@
 
 require 'sidekiq/job'
 
-# TODO, enable sidekiq job
 module Infra
   class EventHandler < ApplicationJob
     prepend RailsEventStore::AsyncHandler
@@ -19,7 +18,11 @@ module Infra
 
     # TODO: define a better solution for this
     def command_bus
-      arguments.first&.fetch(:command_bus) || Rails.configuration.command_bus
+      arguments&.first&.dig(:command_bus) || Rails.configuration.command_bus
+    end
+
+    def event_store
+      arguments&.first&.dig(:event_store) || Rails.configuration.event_store
     end
   end
 end

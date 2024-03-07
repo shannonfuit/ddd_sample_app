@@ -9,15 +9,16 @@ module Processes
 
     # rubocop: disable Metrics/MethodLength
     def call(event)
+      return unless event.data[:change_request_uuid]
+
       spots_change = build_state(event)
-      return unless spots_change.request_submitted? # && !spots_change.processed?
 
       if !spots_change.changed_in_job_fulfillment?
         change_in_job_fulfillment(spots_change)
       elsif !spots_change.changed_in_job_drafting?
         change_in_job_drafting(spots_change)
       elsif spots_change.changed_as_requested?
-        accept_request(spots_change)
+        approve_request(spots_change)
       elsif spots_change.changed_to_minimum_required?
         reject_request(spots_change)
       end
@@ -39,7 +40,7 @@ module Processes
     end
 
     def stream_name(event)
-      "Processes::ChangeSpots$#{event.data.fetch(:job_uuid)}"
+      "Processes::ChangeSpots$#{event.data.fetch(:change_request_uuid)}"
     end
 
     private
@@ -47,47 +48,52 @@ module Processes
     attr_reader :command_bus, :event_store
 
     def change_in_job_fulfillment(spots_change)
+      puts '##### ChangeSpots: Change in job fulfillment'
       command_bus.call(
         JobFulfillment::ChangeSpots.new(
           job_uuid: spots_change.job_uuid,
+          change_request_uuid: spots_change.request_uuid,
           spots: spots_change.requested_spots
         )
       )
     end
 
     def change_in_job_drafting(spots_change)
+      puts '##### ChangeSpots: Change in job drafting'
       command_bus.call(
         JobDrafting::ChangeSpots.new(
           job_uuid: spots_change.job_uuid,
+          change_request_uuid: spots_change.request_uuid,
           spots: spots_change.requested_spots
         )
       )
     end
 
-    def accept_request(spots_change)
+    def approve_request(spots_change)
+      puts '##### ChangeSpots: Accept request'
       command_bus.call(
-        JobDrafting::AcceptSpotsChangeRequest.new(
-          spots_change_request_uuid: spots_change.request_uuid
+        JobDrafting::ApproveSpotsChangeRequest.new(
+          change_request_uuid: spots_change.request_uuid
         )
       )
     end
 
     def reject_request(spots_change)
+      puts '##### ChangeSpots: Reject request'
       command_bus.call(
         JobDrafting::RejectSpotsChangeRequest.new(
-          spots_change_request_uuid: spots_change.request_uuid,
+          change_request_uuid: spots_change.request_uuid,
           minimum_required_spots: spots_change.changed_to
         )
       )
     end
 
     class State
-      attr_reader :job_uuid, :requested_spots, :request_uuid, :changed_to
+      attr_reader :request_uuid, :job_uuid, :requested_spots, :changed_to
 
       def initialize
         @job_uuid = nil
         @request_uuid = nil
-        @status = :pending
         @requested_spots = nil
         @changed_in_job_fulfillment = false
         @changed_in_job_drafting = false
@@ -106,22 +112,16 @@ module Processes
         when JobDrafting::SpotsSetOnJob
           apply_changed_in_job_drafting(event)
         end
-
-        # nil unless finished?
-
-        # @status = :processed if finished?
       end
 
       def apply_request_submitted(event)
-        puts "##### ChangeSpots: apply_request_submitted: #{event.data.inspect}"
-        @request_uuid = event.data.fetch(:spots_change_request_uuid)
+        @request_uuid = event.data.fetch(:change_request_uuid)
         @requested_spots = event.data.fetch(:requested_spots)
       end
 
       def apply_changed_in_job_fulfillment(event)
         return unless request_submitted?
 
-        puts "##### ChangeSpots: apply_changed_in_job_fulfillment: #{event.data.inspect}"
         @changed_in_job_fulfillment = true
         @changed_to = event.data.fetch(:spots)
       end
@@ -129,7 +129,6 @@ module Processes
       def apply_changed_in_job_drafting(_event)
         return unless request_submitted?
 
-        puts '##### ChangeSpots: apply_changed_in_job_drafting'
         @changed_in_job_drafting = true
       end
 
@@ -152,14 +151,6 @@ module Processes
       def changed_to_minimum_required?
         changed_in_job_fulfillment? && changed_in_job_drafting? && @changed_to != @requested_spots
       end
-
-      # def finished?
-      #   request_submitted? && changed_in_job_fulfillment? && changed_in_job_drafting?
-      # end
-
-      # def processed?
-      #   @status == :processed
-      # end
     end
   end
 end

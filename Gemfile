@@ -71,6 +71,7 @@ group :test do
   gem 'mocha'
   gem 'selenium-webdriver'
 end
+gem 'devise'
 gem 'dry-struct'
 gem 'dry-types'
 gem 'dry-validation'

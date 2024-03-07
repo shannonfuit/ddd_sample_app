@@ -5,12 +5,15 @@ require_relative 'test_helper'
 module JobDrafting
   class SubmitSpotsChangeRequestTest < DomainTest
     def setup
-      @spots_change_request_uuid = SecureRandom.uuid
+      @change_request_uuid = SecureRandom.uuid
       @job_uuid = SecureRandom.uuid
-      @stream = "JobDrafting::SpotsChangeRequest$#{@spots_change_request_uuid}"
+      @contact_uuid = SecureRandom.uuid
+      @stream = "JobDrafting::SpotsChangeRequest$#{@change_request_uuid}"
     end
 
     test 'a change request is submitted' do
+      publish_contact_registered
+
       expected_events = [change_request_submitted]
       published_events = act(@stream, submit_change_request)
 
@@ -21,6 +24,12 @@ module JobDrafting
       arrange_change_request_submitted
 
       assert_raises(SpotsChangeRequest::AlreadySubmitted) do
+        act(@stream, submit_change_request)
+      end
+    end
+
+    test 'raises when contact is not registered' do
+      assert_raises(Shared::UserRegistry::UserNotFound) do
         act(@stream, submit_change_request)
       end
     end
@@ -36,33 +45,50 @@ module JobDrafting
     # commands
     def submit_change_request
       SubmitSpotsChangeRequest.new(
-        spots_change_request_uuid: @spots_change_request_uuid,
+        change_request_uuid: @change_request_uuid,
         job_uuid: @job_uuid,
-        current_spots: 3,
+        contact_uuid: @contact_uuid,
         requested_spots: 1
       )
     end
 
     def invalid_submit_change_request
       SubmitSpotsChangeRequest.new(
-        spots_change_request_uuid: @spots_change_request_uuid,
+        change_request_uuid: @change_request_uuid,
         job_uuid: @job_uuid,
-        current_spots: 0,
         requested_spots: 0
       )
     end
 
-    # events
+    # build aggregate
     def arrange_change_request_submitted
+      publish_contact_registered
       arrange(@stream, [change_request_submitted])
+    end
+
+    def publish_contact_registered
+      event_store.publish(contact_registered)
+    end
+
+    # events
+
+    def contact_registered
+      Iam::ContactRegistered.new(
+        data: {
+          user_uuid: @contact_uuid,
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john.doe@example.com'
+        }
+      )
     end
 
     def change_request_submitted
       SpotsChangeRequestSubmitted.new(
         data: {
-          spots_change_request_uuid: @spots_change_request_uuid,
+          change_request_uuid: @change_request_uuid,
           job_uuid: @job_uuid,
-          current_spots: 3,
+          contact_uuid: @contact_uuid,
           requested_spots: 1
         }
       )

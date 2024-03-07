@@ -3,55 +3,39 @@
 require_relative 'test_helper'
 
 module JobFulfillment
-  class CreateJobTest < DomainTest
-    def setup
-      @job_uuid = SecureRandom.uuid
-      @starts_on = 1.day.from_now
-      @spots = 1
-      @stream = "JobFulfillment::Job$#{@job_uuid}"
-    end
-
-    test 'a job is created' do
-      published = act(@stream, create_job_command)
-      expected_events = [job_created_event]
+  class OpenJobTest < DomainTest
+    test 'a job is opened' do
+      published = act(@stream, open_job)
+      expected_events = [job_opened(spots: @spots, starts_on: @starts_on)]
 
       assert_events(published, expected_events)
     end
 
-    test 'a job can only be created once' do
-      job_created = job_created_event
-      create_job = create_job_command
-      arrange(@stream, [job_created])
-      assert_raises(Job::HasAlreadyBeenCreated) { act(@stream, create_job) }
+    test 'a job can only be opened once' do
+      arrange_job_opened
+
+      assert_raises(Job::AlreadyOpen) { act(@stream, open_job) }
     end
 
     test 'it validates the input of the command' do
-      assert_raises(Infra::Command::Invalid) { invalid_job_command }
+      assert_raises(Infra::Command::Invalid) { open_invalid_job }
     end
 
     private
 
-    def job_created_event
-      JobCreated.new(
-        data: {
-          job_uuid: @job_uuid,
-          starts_on: @starts_on,
-          spots: @spots
-        }
-      )
-    end
-
-    def create_job_command
-      CreateJob.new(
-        job_uuid: @job_uuid,
+    # commands
+    def open_job
+      OpenJob.new(
+        job_uuid: @uuid,
+        contact_uuid: @contact_uuid,
         starts_on: @starts_on,
         spots: @spots
       )
     end
 
-    def invalid_job_command
-      CreateJob.new(
-        job_uuid: @job_uuid
+    def open_invalid_job
+      OpenJob.new(
+        job_uuid: @uuid
       )
     end
   end

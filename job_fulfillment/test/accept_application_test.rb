@@ -5,15 +5,13 @@ require_relative 'test_helper'
 module JobFulfillment
   class AcceptApplicationTest < DomainTest
     def setup
-      @uuid = SecureRandom.uuid
-      @application_uuid = SecureRandom.uuid
-      @stream = "JobFulfillment::Job$#{@uuid}"
-
-      arrange_setup_for_test
+      super
+      publish_contact_registered
     end
 
     test 'an application gets accepted' do
       arrange_candidate_applied
+
       expected_events = [application_accepted]
       published_events = act(@stream, accept_application)
 
@@ -21,27 +19,32 @@ module JobFulfillment
     end
 
     test 'no event gets published when a candidate is already accepted' do
-      arrange_candidate_applied
-      arrange(@stream, [application_accepted])
+      arrange_application_accepted
+
       published_events = act(@stream, accept_application)
 
       assert_no_events(published_events)
     end
 
-    test 'it raises when an application is not found' do
-      assert_raises(Job::ApplicationNotFound) do
+    test 'cannot accept when the application cannot be found' do
+      arrange_job_opened
+
+      assert_raises(Application::NotFound) do
         act(@stream, accept_application)
       end
     end
 
-    test 'it cannot apply if the application is not pending' do
-      arrange_candidate_rejected
-      assert_raises(Job::ApplicationNotPending) do
+    test 'it cannot accept if the application is not pending' do
+      arrange_application_rejected
+
+      assert_raises(Application::NotPending) do
         act(@stream, accept_application)
       end
     end
 
     test 'it validates the input of the command' do
+      arrange_job_opened
+
       assert_raises(Infra::Command::Invalid) do
         invalid_accept_application
       end
@@ -49,18 +52,38 @@ module JobFulfillment
 
     private
 
-    def application_accepted
-      ApplicationAccepted.new(
-        data:
-        {
-          job_uuid: @uuid,
-          application_uuid: @application_uuid
-        }
+    # commands
+    def accept_application
+      AcceptApplication.new(
+        job_uuid: @uuid,
+        contact_uuid: @contact_uuid,
+        application_uuid: @application_uuid
       )
     end
 
+    def invalid_accept_application
+      AcceptApplication.new(job_uuid: @uuid)
+    end
+
+    # build_aggregate
     def arrange_candidate_applied
-      candidate_applied = CandidateApplied.new(
+      arrange_job_opened
+      arrange(@stream, [candidate_applied])
+    end
+
+    def arrange_application_accepted
+      arrange_job_opened
+      arrange(@stream, [candidate_applied, application_accepted])
+    end
+
+    def arrange_application_rejected
+      arrange_job_opened
+      arrange(@stream, [candidate_applied, application_rejected])
+    end
+
+    # events
+    def candidate_applied
+      CandidateApplied.new(
         data:
         {
           job_uuid: @uuid,
@@ -69,42 +92,28 @@ module JobFulfillment
           motivation: @motivation
         }
       )
-      arrange(@stream, [candidate_applied])
     end
 
-    def arrange_candidate_rejected
-      arrange_candidate_applied
-      candidate_rejected = ApplicationRejected.new(
+    def application_accepted
+      ApplicationAccepted.new(
         data:
         {
           job_uuid: @uuid,
-          application_uuid: @application_uuid
+          application_uuid: @application_uuid,
+          contact_uuid: @contact_uuid
         }
       )
-      arrange(@stream, [candidate_rejected])
     end
 
-    def arrange_setup_for_test
-      job_created = JobCreated.new(
-        data: {
+    def application_rejected
+      ApplicationRejected.new(
+        data:
+        {
           job_uuid: @uuid,
-          starts_on: Time.zone.now.tomorrow,
-          ends_on: Time.zone.now.tomorrow + 1.day,
-          spots: 1
+          application_uuid: @application_uuid,
+          contact_uuid: @contact_uuid
         }
       )
-      arrange(@stream, [job_created])
-    end
-
-    def accept_application
-      AcceptApplication.new(
-        job_uuid: @uuid,
-        application_uuid: @application_uuid
-      )
-    end
-
-    def invalid_accept_application
-      AcceptApplication.new(job_uuid: @uuid)
     end
   end
 end

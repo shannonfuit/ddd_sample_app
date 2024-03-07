@@ -23,7 +23,7 @@ module Customer
           wage_per_hour: '10.85'.to_d,
           work_location: {
             street: '123 Main St',
-            house_number: 123,
+            house_number: '123',
             city: 'Anytown',
             zip_code: '12345'
           },
@@ -54,13 +54,14 @@ module Customer
       JobDrafting::JobPublished.new(
         data: {
           job_uuid: @job_uuid,
+          contact_uuid: SecureRandom.uuid,
           shift: { starts_on: @shift_duration[:starts_on], ends_on: @shift_duration[:ends_on] },
           spots: 1,
           vacancy: { title: 'Bartender', description: 'Serving drinks', dress_code_requirements: 'Casual' },
           wage_per_hour: '10.85'.to_d,
           work_location: {
             street: '123 Main St',
-            house_number: 123,
+            house_number: '123',
             city: 'Anytown',
             zip_code: '12345'
           }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JobFulfillment
-  class JobCreated < Infra::Event
+  class JobOpened < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
     attribute :starts_on, Infra::Types::Time
     attribute :spots, Infra::Types::Spots
@@ -9,12 +9,14 @@ module JobFulfillment
 
   class SpotsChangedAsRequested < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
+    attribute :change_request_uuid, Infra::Types::UUID
     attribute :spots, Infra::Types::Spots
     attribute :available_spots, Infra::Types::Integer
   end
 
   class SpotsChangedToMinimumRequired < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
+    attribute :change_request_uuid, Infra::Types::UUID
     attribute :spots, Infra::Types::Spots
     attribute :available_spots, Infra::Types::Integer
   end
@@ -32,13 +34,15 @@ module JobFulfillment
     attribute :candidate_uuid, Infra::Types::UUID
   end
 
-  class ApplicationRejected < Infra::Event
-    attribute :job_uuid, Infra::Types::UUID
-    attribute :application_uuid, Infra::Types::UUID
-  end
-
   class ApplicationAccepted < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
     attribute :application_uuid, Infra::Types::UUID
+    attribute :contact_uuid, Infra::Types::UUID
+  end
+
+  class ApplicationRejected < Infra::Event
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :application_uuid, Infra::Types::UUID
+    attribute :contact_uuid, Infra::Types::UUID
   end
 end

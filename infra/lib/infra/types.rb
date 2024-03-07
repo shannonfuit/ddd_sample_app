@@ -36,7 +36,7 @@ module Infra
 
     class Address < SymbolizeStruct
       attribute :street, NotEmpty::String
-      attribute :house_number, Types::Integer
+      attribute :house_number, Types::String
       attribute :city, NotEmpty::String
       attribute :zip_code, NotEmpty::String
     end
