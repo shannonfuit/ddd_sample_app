@@ -1,24 +1,28 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+run `bin/setup` to install the dependencies and create a database
 
-Things you may want to cover:
+if you have postgres installed through homebrew 
+it might throw psql: FATAL:  role "postgres" does not exist. This stackoverflow page explains how to solve it
+https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist
 
-* Ruby version
+psql -U postgres
+\c ddd_sample_app_development
 
-* System dependencies
+## Run Tests
 
-* Configuration
+To run the Rails test suite, use the following command:
+`bin/rails test`
 
-* Database creation
+## Run Demo Script
 
-* Database initialization
+`rails runner demo_script.rb`
 
-* How to run the test suite
+## create a bounded context
 
-* Services (job queues, cache servers, search engines, etc.)
+`rails generate rails_event_store:bounded_context <YOUR_BOUNDED_CONTEXT_NAME>`
 
-* Deployment instructions
+## view events
 
-* ...
+`bundle exec rails s`
+go to http://localhost:3000/res

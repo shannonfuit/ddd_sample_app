@@ -123,7 +123,7 @@ module JobDrafting
     end
 
     def vacancy_set_on_job
-      VacancySetObJob.new(
+      VacancySetOnJob.new(
         data: { job_uuid: @job_uuid,
                 vacancy: { title: @title, description: @description,
                            dress_code_requirements: @dress_code_requirements } }

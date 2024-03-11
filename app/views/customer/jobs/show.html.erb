@@ -1,6 +1,67 @@
-<h1>Animal Details</h1>
+<p style="color: green"><%= notice %></p>
 
-<p><strong>Registration Number:</strong> <%= @animal.uuid %></p>
-<p><strong>Registered By:</strong> <%= @animal.registered_by %></p>
+<h1><%=@job.vacancy[:title]%></h1>
 
-<%= link_to 'Back to Animal List', internal_animals_path %>
+<h2>Job Details</h2>
+<p>
+  <strong>Status:</strong>
+  <%= @job.status %>
+</p>
+<p>
+  <strong>Shift Times:</strong>
+  <%= @job.shift_starts_on %> - <%= @job.shift_ends_on %>
+</p>
+<p>
+  <strong>Spots:</strong>
+  <%= "#{@job.taken_spots} / #{@job.spots}" %>
+</p>
+<p>
+  <strong>Wage_per_hour:</strong>
+  <%= @job.wage_per_hour.to_s %>
+</p>
+<p>
+  <strong>Description:</strong>
+  <%= @job.vacancy['description'] %>
+</p>
+<p>
+  <strong>Dress Code Requirements:</strong>
+  <%= @job.vacancy['dress_code_requirements'] %>
+</p>
+<p>
+  <strong>Work Location:</strong>
+  <%= @job.work_location['street'] %> <%= @job.work_location['house_number'] %>
+  <%= @job.work_location['city'] %> <%= @job.work_location['zip_code'] %>
+</p>
+<p>
+  <strong>Job Reference:</strong>
+  <%= @job.uuid %>
+</p>
+<p>
+  <strong>Created at:</strong>
+  <%= @job.created_at %>
+</p>
+
+<h2>Applications</h2>
+<% @job.applications.each do |application| %>
+  <p>
+    <strong>Candidate:</strong>
+    <%= application['candidate_name'] %>
+  </p>
+
+  <p>
+    <strong>status:</strong>
+    <%= application['status'] %>
+  </p>
+
+  <% if application['status'] == 'pending'%>
+    <%= button_to "Accept", accept_application_customer_job_path(uuid: @job.uuid, application_uuid: application['uuid']), method: :put if @job.open_spots? %>
+    <%= button_to "Reject", reject_application_customer_job_path(uuid: @job.uuid, application_uuid: application['uuid']), method: :put %>
+  <% end %>
+<% end %>
+
+<div>
+  <%= link_to "Back to jobs", customer_jobs_path %>
+  <% if @job.can_unpublish? %>
+    <%= button_to "Unpublish this job", unpublish_customer_job_path(uuid: @job.uuid), method: :put %>
+  <% end %>
+</div>

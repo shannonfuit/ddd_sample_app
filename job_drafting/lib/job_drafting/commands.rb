@@ -15,6 +15,7 @@ module JobDrafting
 
   class UnpublishJob < Infra::Command
     attribute :job_uuid, Infra::Types::UUID
+    attribute :contact_uuid, Infra::Types::UUID
   end
 
   class ChangeSpots < Infra::Command

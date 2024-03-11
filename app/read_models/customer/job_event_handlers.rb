@@ -47,6 +47,46 @@ module Customer
       end
     end
 
+    class OnSpotsSetOnJob < EventHandler
+      def call(event)
+        update_job(event.data.fetch(:job_uuid)) do |job|
+          job.spots = event.data.fetch(:spots)
+        end
+      end
+    end
+
+    class OnShiftSetOnJob < EventHandler
+      def call(event)
+        update_job(event.data.fetch(:job_uuid)) do |job|
+          job.shift_starts_on = event.data.fetch(:shift)
+        end
+      end
+    end
+
+    class OnVacancySetOnJob < EventHandler
+      def call(event)
+        update_job(event.data.fetch(:job_uuid)) do |job|
+          job.vacancy = event.data.fetch(:vacancy)
+        end
+      end
+    end
+
+    class OnWagePerHourSetOnJob < EventHandler
+      def call(event)
+        update_job(event.data.fetch(:job_uuid)) do |job|
+          job.wage_per_hour = event.data.fetch(:wage_per_hour)
+        end
+      end
+    end
+
+    class OnWorkLocationSetOnJob < EventHandler
+      def call(event)
+        update_job(event.data.fetch(:job_uuid)) do |job|
+          job.work_location = event.data.fetch(:work_location)
+        end
+      end
+    end
+
     class OnCandidateApplied < EventHandler
       def call(event)
         application_attributes = {

@@ -86,8 +86,6 @@ module JobFulfillment
       application = @applications.find_by!(uuid: application_uuid)
       return if application.rejected?
 
-      validate_can_reject
-
       apply ApplicationRejected.new(
         data: {
           job_uuid: @uuid,
@@ -162,10 +160,6 @@ module JobFulfillment
     end
 
     def validate_can_witdraw
-      validate_job_not_started
-    end
-
-    def validate_can_reject
       validate_job_not_started
     end
 

@@ -2,23 +2,24 @@
 
 module Customer
   class JobsController < BaseController
+    # TODO: scope this to the current contact
     def index
       @jobs = Customer::Job.all
     end
 
     def show
-      @job = Customer::Job.find_by!(uuid: params[:id])
+      @job = Customer::Job.find_by!(uuid: params[:uuid])
     end
 
     def new
-      @new ||= SecureRandom.uuid
+      @uuid = SecureRandom.uuid
     end
 
     def create
       command_bus.call(
         JobDrafting::PublishJob.new(
-          job_uuid: params[:job_uuid],
-          contact_uuid: current_user.uuid,
+          job_uuid: params[:uuid],
+          contact_uuid: current_contact.uuid,
           title: params[:title],
           description: params[:description],
           dress_code_requirements: params[:dress_code_requirements],
@@ -37,18 +38,53 @@ module Customer
         )
       )
 
-      redirect_to customer_job_path(params[:job_uuid]), notice: 'Job is published.'
+      redirect_to customer_job_url(params[:uuid]), notice: 'Job was Published.'
     rescue Infra::Command::Invalid => e
+      # TODO: Non happy flow
       flash.now[:alert] = e.message
-      Rails.logger.debug e.message
       @uuid = params[:uuid]
       render :new
     end
 
-    private
+    def unpublish
+      command_bus.call(
+        JobDrafting::UnpublishJob.new(
+          job_uuid: params[:uuid],
+          contact_uuid: current_contact.uuid
+        )
+      )
 
-    def generate_uuid
-      SecureRandom.uuid
+      redirect_to customer_job_url(params[:uuid]), notice: 'Job was successfully unpublished.'
+    rescue StandardError
+      # TODO: Non happy flow
+    end
+
+    def accept_application
+      command_bus.call(
+        JobFulfillment::AcceptApplication.new(
+          job_uuid: params[:uuid],
+          application_uuid: params[:application_uuid],
+          contact_uuid: current_contact.uuid
+        )
+      )
+
+      redirect_to customer_job_url(params[:uuid]), notice: 'Application was accepted.'
+    rescue StandardError
+      # TODO: non happy flow
+    end
+
+    def reject_application
+      command_bus.call(
+        JobFulfillment::RejectApplication.new(
+          job_uuid: params[:uuid],
+          application_uuid: params[:application_uuid],
+          contact_uuid: current_contact.uuid
+        )
+      )
+
+      redirect_to customer_job_url(params[:uuid]), notice: 'Application was rejected.'
+    rescue StandardError
+      # TODO: non happy flow
     end
   end
 end

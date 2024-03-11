@@ -1,20 +1,14 @@
-<!-- app/views/internal/animals/index.html.erb -->
+<p style="color: green"><%= notice %></p>
 
-<h1>Job List</h1>
+<h1>Jobs</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Title</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @jobs.each do |job| %>
-      <tr>
-        <td><%= job.title %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<div id="jobs">
+  <% @jobs.each do |job| %>
+    <%= render job %>
+    <p>
+      <%= link_to "Show this job", customer_job_path(uuid: job.uuid) %>
+    </p>
+  <% end %>
+</div>
 
 <%= link_to 'Publish a job', new_customer_job_path %>

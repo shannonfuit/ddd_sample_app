@@ -12,5 +12,17 @@ module Customer
     APPLICATION_WITHDRAWN = 'withdrawn'
     APPLICATION_ACCEPTED = 'accepted'
     APPLICATION_REJECTED = 'rejected'
+
+    def taken_spots
+      applications.count { |app| app['status'] == APPLICATION_ACCEPTED }
+    end
+
+    def can_unpublish?
+      status == PUBLISHED
+    end
+
+    def open_spots?
+      spots > taken_spots
+    end
   end
 end

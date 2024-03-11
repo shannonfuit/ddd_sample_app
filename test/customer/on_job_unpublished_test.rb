@@ -8,6 +8,7 @@ module Customer
 
     setup do
       @job_uuid = SecureRandom.uuid
+      @contact_uuid = SecureRandom.uuid
       Job.create(uuid: @job_uuid, status: 'published')
     end
 
@@ -36,7 +37,12 @@ module Customer
     end
 
     def job_unpublished_event
-      JobDrafting::JobUnpublished.new(data: { job_uuid: @job_uuid })
+      JobDrafting::JobUnpublished.new(
+        data: {
+          job_uuid: @job_uuid,
+          contact_uuid: @contact_uuid
+        }
+      )
     end
   end
 end

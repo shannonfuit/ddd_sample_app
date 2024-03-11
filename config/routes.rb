@@ -23,7 +23,13 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root 'contacts/jobs#index'
   namespace :customer do
-    resources :jobs, only: %i[index show new create]
+    resources :jobs, param: :uuid, only: %i[index show new create] do
+      member do
+        put :unpublish
+        put :accept_application, to: 'jobs#accept_application'
+        put :reject_application, to: 'jobs#reject_application'
+      end
+    end
 
     root 'contacts/jobs#index'
   end

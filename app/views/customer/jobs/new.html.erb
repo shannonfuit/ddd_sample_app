@@ -1,64 +1,10 @@
 <h1>Publish Job</h1>
 
-<%= form_with(url: customer_jobs_path, method: :post) do |form| %>
-  <%= form.hidden_field :job_uuid, value: @uuid %>
+<!-- change TODO: @job for formobject -->
+<%= render "form", job: @job, uuid: @uuid %>
 
-  <div class="field">
-    <%= form.label :title %>
-    <%= form.text_field :title %>
-  </div>
+<br>
 
-  <div class="field">
-    <%= form.label :description %>
-    <%= form.text_area :description %>
-  </div>
-
-  <div class="field">
-    <%= form.label :dress_code_requirements %>
-    <%= form.text_field :dress_code_requirements %>
-  </div>
-
-  <div class="field">
-    <%= form.label 'Shift Starts On' %>
-    <%= form.datetime_field :shift_starts_on %>
-  </div>
-
-  <div class="field">
-    <%= form.label 'Shift Ends On' %>
-    <%= form.datetime_field :shift_ends_on %>
-  </div>
-
-  <div class="field">
-    <%= form.label :spots %>
-    <%= form.number_field :spots %>
-  </div>
-
-  <div class="field">
-    <%= form.label :wage_per_hour %>
-    <%= form.text_field :wage_per_hour %>
-  </div>
-
-  <div class="field">
-    <%= form.label 'Work Location Street' %>
-    <%= form.text_field 'work_location[street]' %>
-  </div>
-
-  <div class="field">
-    <%= form.label 'Work Location House Number' %>
-    <%= form.text_field 'work_location[house_number]' %>
-  </div>
-
-  <div class="field">
-    <%= form.label 'Work Location City' %>
-    <%= form.text_field 'work_location[city]' %>
-  </div>
-
-  <div class="field">
-    <%= form.label 'Work Location Zip Code' %>
-    <%= form.text_field 'work_location[zip_code]' %>
-  </div>
-
-  <div>
-    <%= form.submit 'Publish Job' %>
-  </div>
-<% end %>
+<div>
+  <%= link_to "Back to jobs", customer_jobs_path %>
+</div>

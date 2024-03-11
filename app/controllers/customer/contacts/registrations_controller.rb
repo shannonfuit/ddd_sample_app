@@ -16,11 +16,13 @@ module Customer
         Contact.transaction do
           super
           command_bus.call(
-            Iam::RegisterContact.new(
-              uuid: current_contact.uuid,
+            Iam::RegisterAsContact.new(
+              user_uuid: current_contact.uuid,
               email: current_contact.email,
-              first_name: params[:contact][:first_name],
-              last_name: params[:contact][:last_name]
+              name: {
+                first_name: params[:contact][:first_name],
+                last_name: params[:contact][:last_name]
+              }
             )
           )
         end

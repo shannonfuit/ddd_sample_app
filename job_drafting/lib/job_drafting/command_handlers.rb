@@ -51,7 +51,10 @@ module JobDrafting
 
   class OnUnpublishJob < JobCommandHandler
     def call(command)
-      repository.with_job(command.job_uuid, &:unpublish)
+      contact = user_registry.find_user!(command.contact_uuid, role: :contact)
+      repository.with_job(command.job_uuid) do |job|
+        job.unpublish(contact.uuid)
+      end
     end
   end
 

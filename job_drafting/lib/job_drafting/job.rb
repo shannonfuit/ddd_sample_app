@@ -35,7 +35,7 @@ module JobDrafting
     def set_vacancy(vacancy)
       return if @vacancy == vacancy
 
-      apply VacancySetObJob.new(data: { job_uuid: @uuid, vacancy: vacancy.value })
+      apply VacancySetOnJob.new(data: { job_uuid: @uuid, vacancy: vacancy.value })
     end
 
     def set_wage_per_hour(wage_per_hour)
@@ -67,11 +67,16 @@ module JobDrafting
       )
     end
 
-    def unpublish
+    def unpublish(contact_uuid)
       return if unpublished?
       raise JobIsNotPublished unless published?
 
-      apply JobUnpublished.new(data: { uuid: @uuid })
+      apply JobUnpublished.new(
+        data: {
+          job_uuid: @uuid,
+          contact_uuid:
+        }
+      )
     end
 
     private
@@ -84,7 +89,7 @@ module JobDrafting
       @spots = event.data.fetch(:spots)
     end
 
-    on VacancySetObJob do |event|
+    on VacancySetOnJob do |event|
       @vacancy = Vacancy.new(**event.data.fetch(:vacancy))
     end
 

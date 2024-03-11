@@ -12,7 +12,7 @@ module JobDrafting
     attribute? :change_request_uuid, Infra::Types::UUID.optional
   end
 
-  class VacancySetObJob < Infra::Event
+  class VacancySetOnJob < Infra::Event
     attribute :job_uuid, Infra::Types::UUID
     attribute :vacancy, Vacancy.typed_value
   end
@@ -38,6 +38,8 @@ module JobDrafting
   end
 
   class JobUnpublished < Infra::Event
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :contact_uuid, Infra::Types::UUID
   end
 
   class SpotsChangeRequestSubmitted < Infra::Event
