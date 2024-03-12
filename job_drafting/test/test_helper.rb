@@ -13,7 +13,7 @@ module JobDrafting
 
   class ProcessTest < Infra::ProcessTestHelper
     def before_setup
-      Configuration.new.call(command_bus, event_store)
+      JobDrafting.configure(command_bus, event_store)
     end
   end
 end

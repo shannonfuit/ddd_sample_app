@@ -20,7 +20,7 @@ module JobDrafting
       assert_events(published_events, expected_events)
     end
 
-    test 'raises when change request is already submitted' do
+    test 'a change request can only be submitted once' do
       arrange_change_request_submitted
 
       assert_raises(SpotsChangeRequest::AlreadySubmitted) do

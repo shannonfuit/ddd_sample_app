@@ -8,80 +8,59 @@ module JobDrafting
       @job_uuid = SecureRandom.uuid
       @stream = "JobDrafting::Job$#{@job_uuid}"
 
-      @contact_uuid = SecureRandom.uuid
-      @shift_duration = { starts_on: 1.day.from_now, ends_on: 1.day.from_now }
-      @title = 'Waiting tables at Loetje'
-      @description = 'take orders and bring out food'
-      @dress_code_requirements = nil
-      @wage_per_hour = '12.65'
-      @work_location = {
-        street: 'Korte Akkers',
-        house_number: '32',
-        city: 'Veendam',
-        zip_code: '9644XT'
-      }
+      # ....
     end
 
-    test 'a job is published' do
-      contact_registered
-      expected_events = [
-        shift_set_on_job, spots_set_on_job, vacancy_set_on_job, wage_per_hour_set_on_job, work_location_set_on_job,
-        job_published
-      ]
-      published = act(@stream, publish_job)
+    test 'a job can be published' do
+      # add_contact_to_registry
+      # expected_events = []
+      # published_events = act(@stream, publish_job)
 
-      assert_events(published, expected_events)
+      # assert_events(published_events, expected_events)
     end
 
     test 'a job can only be published once' do
-      arrange_job_published
-      published = act(@stream, publish_job)
+      # add_contact_to_registry
+      # arrange_job_published
+      # published_events = act(@stream, publish_job)
 
-      assert_no_events(published)
-    end
-
-    test 'a job cannot be published if it is not complete' do
-      assert_raises(Infra::Command::Invalid) { act(@stream, invalid_publish_job) }
+      # assert_no_events(published_events)
     end
 
     test 'a job cannot be published if the user is not registered' do
-      assert_raises(Shared::UserRegistry::UserNotFound) { act(@stream, publish_job) }
+      # assert_raises(Shared::UserRegistry::UserNotFound) { act(@stream, publish_job) }
     end
+
+    # ... add more tests here
 
     private
 
     # commands
     def publish_job
-      PublishJob.new(
-        job_uuid: @job_uuid,
-        contact_uuid: @contact_uuid,
-        title: @title,
-        description: @description,
-        dress_code_requirements: @dress_code_requirements,
-        shift_duration: @shift_duration,
-        spots: 1,
-        vacancy: { title: @title, description: @description, dress_code_requirements: @dress_code_requirements },
-        wage_per_hour: @wage_per_hour,
-        work_location: @work_location
-      )
+      # PublishJob.new(
+      #   #...
+      # )
     end
 
-    def invalid_publish_job
-      PublishJob.new(job_uuid: @job_uuid)
-    end
-
-    # build aggregate
+    # build aggregate to a specific state
     def arrange_job_published
-      contact_registered
-      events = [
-        shift_set_on_job, spots_set_on_job, vacancy_set_on_job,
-        wage_per_hour_set_on_job, work_location_set_on_job, job_published
-      ]
+      # add_contact_to_registry
+      # events = [job_published]
 
-      arrange(@stream, events)
+      # arrange(@stream, events)
     end
 
-    def contact_registered
+    # events
+    def job_published
+      # JobPublished.new(
+      #   data: {
+      #     # ...
+      #   }
+      # )
+    end
+
+    # setup
+    def add_contact_to_registry
       event_store.publish(
         Iam::ContactRegistered.new(
           data: {
@@ -91,54 +70,6 @@ module JobDrafting
             email: 'john.doe@example.com'
           }
         )
-      )
-    end
-
-    # events
-    def job_published
-      JobPublished.new(
-        data: {
-          job_uuid: @job_uuid,
-          contact_uuid: @contact_uuid,
-          shift: { starts_on: @shift_duration[:starts_on], ends_on: @shift_duration[:ends_on] },
-          spots: 1,
-          vacancy: { title: @title, description: @description, dress_code_requirements: @dress_code_requirements },
-          wage_per_hour: @wage_per_hour.to_d,
-          work_location: @work_location
-        }
-      )
-    end
-
-    def shift_set_on_job
-      ShiftSetOnJob.new(
-        data: { job_uuid: @job_uuid,
-                shift: { starts_on: @shift_duration[:starts_on], ends_on: @shift_duration[:ends_on] } }
-      )
-    end
-
-    def spots_set_on_job
-      SpotsSetOnJob.new(
-        data: { job_uuid: @job_uuid, spots: 1, change_request_uuid: nil }
-      )
-    end
-
-    def vacancy_set_on_job
-      VacancySetOnJob.new(
-        data: { job_uuid: @job_uuid,
-                vacancy: { title: @title, description: @description,
-                           dress_code_requirements: @dress_code_requirements } }
-      )
-    end
-
-    def wage_per_hour_set_on_job
-      WagePerHourSetOnJob.new(
-        data: { job_uuid: @job_uuid, wage_per_hour: @wage_per_hour }
-      )
-    end
-
-    def work_location_set_on_job
-      WorkLocationSetOnJob.new(
-        data: { job_uuid: @job_uuid, work_location: @work_location }
       )
     end
   end

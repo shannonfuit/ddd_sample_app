@@ -22,14 +22,7 @@ Rails.configuration.to_prepare do
     # Configure domain
     Iam.configure(command_bus, event_store)
     JobDrafting.configure(command_bus, event_store)
-    JobFulfillment.configure(command_bus, event_store)
     Demo.configure(command_bus, event_store)
-
-    # Configure processes
-    Processes.configure(command_bus, event_store)
-
-    # Configure read models
-    Customer.configure(event_store)
   end
 
   # For debugging purposes

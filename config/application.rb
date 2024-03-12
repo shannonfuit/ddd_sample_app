@@ -14,7 +14,6 @@ module DddSampleApp
     config.paths.add 'iam/lib', eager_load: true
     config.paths.add 'processes/lib', eager_load: true
     config.paths.add 'job_drafting/lib', eager_load: true
-    config.paths.add 'job_fulfillment/lib', eager_load: true
     config.paths.add 'demo/lib', eager_load: true
     config.paths.add 'infra/lib', eager_load: true
     # Initialize configuration defaults for originally generated Rails version.
