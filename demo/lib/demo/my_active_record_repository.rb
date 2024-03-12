@@ -3,7 +3,7 @@
 module Demo
   class MyActiveRecordRepository < Infra::ActiveRecordRepository
     # store your data in a denormalized way so that it is fast for writes
-    # Do not specify any belongs_to in on your root
+    # Do not specify any belongs_to on your root,
     # because an Aggregate should not share parts with another Aggregate
     # Use nested attributes to store the nested entities
     class Record < ApplicationRecord
@@ -13,16 +13,16 @@ module Demo
 
     # preload the complete aggregate,
     # include all nested entities or value objects
-    # map the attributes to the aggregate's constructor
+    # map the attributes and pass them to the aggregate's constructor
     # any mapping from record attributes to aggregate attributes would
     # be implemented in the aggregate
     def load(record)
       MyActiveRecordAggregate.new(**record.attributes.symbolize_keys)
     end
 
-    # map the aggregate's attributes to the record's attributes
-    # any mapping from aggregate attributes to record attributes would
-    # publish the unpublished events
+    # map the aggregate's attributes to the record's columns,
+    # and store in a single commit
+    # Also publish the unpublished events
     def store(aggregate, uuid, stream_name)
       record = Record.find_or_initialize_by(uuid:)
       record.update!(aggregate.state_for_repository)
@@ -42,6 +42,10 @@ module Demo
 
     def stream_name(uuid)
       "Demo::MyActiveRecordAggregate$#{uuid}"
+    end
+
+    def transaction(&)
+      Record.transaction(&)
     end
   end
 end
