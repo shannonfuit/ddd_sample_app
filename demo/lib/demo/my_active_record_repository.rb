@@ -23,7 +23,8 @@ module Demo
     # map the aggregate's attributes to the record's attributes
     # any mapping from aggregate attributes to record attributes would
     # publish the unpublished events
-    def store(aggregate, record, stream_name)
+    def store(aggregate, uuid, stream_name)
+      record = Record.find_or_initialize_by(uuid:)
       record.update!(aggregate.state_for_repository)
       @event_store.publish(
         aggregate.unpublished_events,
@@ -32,12 +33,11 @@ module Demo
       )
     end
 
-    # TODO: Remove lock and application transaction before the assignment!!
     def with_uuid(uuid, &block)
-      record = Record.lock.find_or_initialize_by(uuid:)
+      record = Record.find_or_initialize_by(uuid:)
       aggregate = load(record)
       block.call(aggregate)
-      store(aggregate, record, stream_name(uuid)) and return # so we dont return the eventstore
+      store(aggregate, uuid, stream_name(uuid)) and return # so we dont return the eventstore
     end
 
     def stream_name(uuid)

@@ -4,8 +4,8 @@ module Demo
   class CommandHandler < Infra::CommandHandler
     def initialize(**args)
       super
-      @repository = MyEventSourcedRepository.new(event_store)
-      # @repository = MyActiveRecordRepository.new(event_store)
+      # @repository = MyEventSourcedRepository.new(event_store)
+      @repository = MyActiveRecordRepository.new(event_store)
     end
   end
 
