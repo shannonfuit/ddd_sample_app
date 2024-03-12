@@ -2,9 +2,10 @@
 
 module Demo
   class MyEventSourcedAggregate
-    include EventSourcedAggregateRoot
+    include AggregateRoot
 
-    def initialize(_uuid)
+    def initialize(uuid)
+      @uuid = uuid
       @amount_of_items = 0
     end
 
@@ -20,13 +21,13 @@ module Demo
     on FastItemAdded do |_event|
       @amount_of_items += 1
       puts '*** on FastItemAdded'
-      puts @amount_of_items
+      puts "Amount of items is now: #{@amount_of_items}"
     end
 
     on SlowItemAdded do |_event|
       @amount_of_items += 1
-      puts '*** on FastSlowAdded'
-      puts @amount_of_items
+      puts '*** on SlowItemAdded'
+      puts "Amount of items is now: #{@amount_of_items}"
     end
   end
 end
