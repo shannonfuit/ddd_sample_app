@@ -8,9 +8,7 @@ require_relative 'job_drafting/event_handlers'
 module JobDrafting
   def self.configure(command_bus, event_store)
     # register job commands
-    command_bus.register(PublishJob, OnPublishJob.new)
     command_bus.register(UnpublishJob, OnUnpublishJob.new)
-    command_bus.register(ChangeSpots, OnChangeSpots.new)
 
     # register change request commands
     command_bus.register(SubmitSpotsChangeRequest, OnSubmitSpotsChangeRequest.new)
@@ -18,7 +16,6 @@ module JobDrafting
     command_bus.register(RejectSpotsChangeRequest, OnRejectSpotsChangeRequest.new)
 
     # registering events
-    event_store.subscribe(SendConfrmationMailOnJobPublished, to: [JobPublished])
     event_store.subscribe(AddUserOnUserRegistered.new, to: [Iam::CandidateRegistered, Iam::ContactRegistered])
   end
 end

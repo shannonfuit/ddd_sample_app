@@ -26,21 +26,6 @@ module JobDrafting
   end
 
   # Job command handlers
-  class OnPublishJob < JobCommandHandler
-    def call(command)
-      contact = user_registry.find_user!(command.contact_uuid, role: :contact)
-
-      repository.with_job(command.job_uuid) do |job|
-        job.set_shift(Shift.from_duration(command.shift_duration))
-        job.set_spots(command.spots)
-        job.set_vacancy(Vacancy.new(command.title, command.description, command.dress_code_requirements))
-        job.set_wage_per_hour(command.wage_per_hour)
-        job.set_work_location(WorkLocation.from_address(command.work_location))
-        job.publish(contact.uuid)
-      end
-    end
-  end
-
   class OnChangeSpots < JobCommandHandler
     def call(command)
       repository.with_job(command.job_uuid) do |job|
