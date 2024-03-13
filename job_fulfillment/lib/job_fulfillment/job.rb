@@ -3,10 +3,11 @@
 module JobFulfillment
   class Job
     include AggregateRoot
-    class AlreadyOpen < StandardError; end
-    class NoSpotsAvailable < StandardError; end
-    class NotOpen < StandardError; end
-    class HasStarted < StandardError; end
+
+    AlreadyOpen = Class.new(StandardError)
+    NoSpotsAvailable = Class.new(StandardError)
+    NotOpen = Class.new(StandardError)
+    HasStarted = Class.new(StandardError)
 
     def initialize(uuid)
       @uuid = uuid

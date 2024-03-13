@@ -47,7 +47,7 @@ module Customer
       end
     end
 
-    class OnSpotsSetOnJob < EventHandler
+    class OnSpotsChangedOnJob < EventHandler
       def call(event)
         update_job(event.data.fetch(:job_uuid)) do |job|
           job.spots = event.data.fetch(:spots)

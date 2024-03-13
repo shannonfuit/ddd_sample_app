@@ -6,7 +6,7 @@ module JobFulfillment
       command_bus.call(
         OpenJob.new(
           job_uuid: event.data.fetch(:job_uuid),
-          contact_uuid: event.data.fetch(:contact_uuid),
+          contact_uuid: event.data.fetch(:published_by),
           starts_on: event.data.fetch(:shift).fetch(:starts_on),
           spots: event.data.fetch(:spots)
         )

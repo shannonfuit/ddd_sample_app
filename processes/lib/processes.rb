@@ -16,7 +16,7 @@ module Processes
           JobDrafting::SpotsChangeRequestSubmitted,
           JobFulfillment::SpotsChangedAsRequested,
           JobFulfillment::SpotsChangedToMinimumRequired,
-          JobDrafting::SpotsSetOnJob
+          JobDrafting::SpotsChangedOnJob
         ]
       )
     end

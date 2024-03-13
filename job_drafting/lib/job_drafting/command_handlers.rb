@@ -31,11 +31,16 @@ module JobDrafting
       contact = user_registry.find_user!(command.contact_uuid, role: :contact)
 
       repository.with_job(command.job_uuid) do |job|
-        job.set_shift(Shift.from_duration(command.shift_duration))
-        job.set_spots(command.spots)
-        job.set_vacancy(Vacancy.new(command.title, command.description, command.dress_code_requirements))
-        job.set_wage_per_hour(command.wage_per_hour)
-        job.set_work_location(WorkLocation.from_address(command.work_location))
+        job.create_draft(
+          contact_uuid: contact.uuid,
+          company_uuid: contact.company_uuid,
+          shift: Shift.from_duration(command.shift_duration),
+          spots: command.spots,
+          vacancy: Vacancy.new(command.title, command.description, command.dress_code_requirements),
+          wage_per_hour: command.wage_per_hour,
+          work_location: WorkLocation.from_address(command.work_location)
+        )
+
         job.publish(contact.uuid)
       end
     end
@@ -44,7 +49,7 @@ module JobDrafting
   class OnChangeSpots < JobCommandHandler
     def call(command)
       repository.with_job(command.job_uuid) do |job|
-        job.set_spots(command.spots, change_request_uuid: command.change_request_uuid)
+        job.change_spots(command.spots, change_request_uuid: command.change_request_uuid)
       end
     end
   end

@@ -4,9 +4,10 @@ module JobDrafting
   class Job
     include AggregateRoot
 
-    class IncompleteDraft < StandardError; end
-    class JobIsNotPublished < StandardError; end
-    class ShiftNeedsToBeInTheFuture < StandardError; end
+    IncompleteDraft = Class.new(StandardError)
+    NotPublished = Class.new(StandardError)
+    AlreadyPublished = Class.new(StandardError)
+    ShiftNeedsToBeInTheFuture = Class.new(StandardError)
 
     def initialize(uuid)
       @uuid = uuid
@@ -16,38 +17,26 @@ module JobDrafting
       @vacancy = nil
       @wage_per_hour = nil
       @work_location = nil
+      @company_uuid = nil
     end
 
-    def set_shift(shift)
-      return if @shift == shift
-      raise ShiftNeedsToBeInTheFuture unless shift.future?
+    def create_draft(attributes)
+      raise AlreadyPublished if published?
 
-      apply ShiftSetOnJob.new(data: { job_uuid: @uuid, shift: shift.value })
-    end
+      validate_shift_in_future(attributes.fetch(:shift))
 
-    def set_spots(spots, change_request_uuid: nil)
-      return if @spots == spots
-
-      SpotsSetOnJob.new(data: { job_uuid: @uuid, spots: })
-      apply SpotsSetOnJob.new(data: { job_uuid: @uuid, spots:, change_request_uuid: })
-    end
-
-    def set_vacancy(vacancy)
-      return if @vacancy == vacancy
-
-      apply VacancySetOnJob.new(data: { job_uuid: @uuid, vacancy: vacancy.value })
-    end
-
-    def set_wage_per_hour(wage_per_hour)
-      return if @wage_per_hour == wage_per_hour
-
-      apply WagePerHourSetOnJob.new(data: { job_uuid: @uuid, wage_per_hour: })
-    end
-
-    def set_work_location(work_location)
-      return if @work_location == work_location
-
-      apply WorkLocationSetOnJob.new(data: { job_uuid: @uuid, work_location: work_location.value })
+      apply JobDrafted.new(
+        data: {
+          job_uuid: @uuid,
+          company_uuid: attributes.fetch(:company_uuid),
+          drafted_by: attributes.fetch(:contact_uuid),
+          shift: attributes.fetch(:shift).value,
+          spots: attributes.fetch(:spots),
+          vacancy: attributes.fetch(:vacancy).value,
+          wage_per_hour: attributes.fetch(:wage_per_hour),
+          work_location: attributes.fetch(:work_location).value
+        }
+      )
     end
 
     def publish(contact_uuid)
@@ -57,7 +46,7 @@ module JobDrafting
       apply JobPublished.new(
         data: {
           job_uuid: @uuid,
-          contact_uuid:,
+          published_by: contact_uuid,
           shift: @shift.value,
           spots: @spots,
           vacancy: @vacancy.value,
@@ -67,9 +56,17 @@ module JobDrafting
       )
     end
 
+    def change_spots(spots, change_request_uuid:)
+      raise NotPublished unless published?
+
+      return if @spots == spots
+
+      apply SpotsChangedOnJob.new(data: { job_uuid: @uuid, spots:, change_request_uuid: })
+    end
+
     def unpublish(contact_uuid)
       return if unpublished?
-      raise JobIsNotPublished unless published?
+      raise NotPublished unless published?
 
       apply JobUnpublished.new(
         data: {
@@ -81,29 +78,22 @@ module JobDrafting
 
     private
 
-    on ShiftSetOnJob do |event|
+    on JobDrafted do |event|
+      @company_uuid = event.data.fetch(:company_uuid)
       @shift = Shift.new(**event.data.fetch(:shift))
-    end
-
-    on SpotsSetOnJob do |event|
       @spots = event.data.fetch(:spots)
-    end
-
-    on VacancySetOnJob do |event|
       @vacancy = Vacancy.new(**event.data.fetch(:vacancy))
-    end
-
-    on WagePerHourSetOnJob do |event|
       @wage_per_hour = event.data.fetch(:wage_per_hour)
-    end
-
-    on WorkLocationSetOnJob do |event|
       @work_location = WorkLocation.new(**event.data.fetch(:work_location))
     end
 
     on JobPublished do |event|
-      @contact_uuid = event.data.fetch(:contact_uuid)
+      @published_by = event.data.fetch(:published_by)
       @state = :published
+    end
+
+    on SpotsChangedOnJob do |event|
+      @spots = event.data.fetch(:spots)
     end
 
     on JobUnpublished do |_event|
@@ -120,6 +110,10 @@ module JobDrafting
 
     def publishable?
       @shift && @spots && @vacancy && @wage_per_hour && @work_location
+    end
+
+    def validate_shift_in_future(shift)
+      raise ShiftNeedsToBeInTheFuture unless shift.future?
     end
   end
 end

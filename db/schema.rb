@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_11_110600) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_13_070349) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -49,13 +49,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_11_110600) do
     t.index ["uuid"], name: "index_customer_candidates_on_uuid", unique: true
   end
 
+  create_table "customer_companies", force: :cascade do |t|
+    t.string "uuid", null: false
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_customer_companies_on_uuid", unique: true
+  end
+
   create_table "customer_jobs", force: :cascade do |t|
     t.string "uuid", null: false
     t.string "status", null: false
     t.integer "spots"
     t.datetime "shift_starts_on"
     t.datetime "shift_ends_on"
-    t.decimal "jobs", precision: 8, scale: 2
     t.decimal "wage_per_hour", precision: 8, scale: 2
     t.jsonb "work_location"
     t.jsonb "vacancy"
@@ -100,6 +107,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_11_110600) do
     t.string "last_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "state"
+    t.string "company_uuid"
     t.index ["uuid"], name: "index_iam_users_on_uuid", unique: true
   end
 

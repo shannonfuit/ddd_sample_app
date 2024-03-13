@@ -64,7 +64,7 @@ module Processes
         JobDrafting::ChangeSpots.new(
           job_uuid: spots_change.job_uuid,
           change_request_uuid: spots_change.request_uuid,
-          spots: spots_change.requested_spots
+          spots: spots_change.changed_to
         )
       )
     end
@@ -109,7 +109,7 @@ module Processes
           apply_request_submitted(event)
         when JobFulfillment::SpotsChangedAsRequested, JobFulfillment::SpotsChangedToMinimumRequired
           apply_changed_in_job_fulfillment(event)
-        when JobDrafting::SpotsSetOnJob
+        when JobDrafting::SpotsChangedOnJob
           apply_changed_in_job_drafting(event)
         end
       end

@@ -19,6 +19,6 @@ module JobDrafting
 
     # registering events
     event_store.subscribe(SendConfrmationMailOnJobPublished, to: [JobPublished])
-    event_store.subscribe(AddUserOnUserRegistered.new, to: [Iam::CandidateRegistered, Iam::ContactRegistered])
+    event_store.subscribe(AddUserOnUserRegistered.new, to: [Iam::ContactRegistered])
   end
 end
