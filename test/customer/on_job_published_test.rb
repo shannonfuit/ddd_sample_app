@@ -54,7 +54,7 @@ module Customer
       JobDrafting::JobPublished.new(
         data: {
           job_uuid: @job_uuid,
-          contact_uuid: SecureRandom.uuid,
+          published_by: SecureRandom.uuid,
           shift: { starts_on: @shift_duration[:starts_on], ends_on: @shift_duration[:ends_on] },
           spots: 1,
           vacancy: { title: 'Bartender', description: 'Serving drinks', dress_code_requirements: 'Casual' },
