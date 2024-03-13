@@ -10,7 +10,11 @@ module Iam
       record = Record.lock.find_or_initialize_by(uuid:)
       aggregate = load(record)
       block.call(aggregate)
-      store(aggregate, record, stream_name(uuid)) and return
+      store(aggregate, uuid, stream_name(uuid)) and return
+    end
+
+    def transaction(&)
+      Record.transaction(&)
     end
 
     private
@@ -19,7 +23,8 @@ module Iam
       User.new(**record.attributes.symbolize_keys)
     end
 
-    def store(aggregate, record, stream_name)
+    def store(aggregate, uuid, stream_name)
+      record = Record.lock.find_or_initialize_by(uuid:)
       record.update!(aggregate.state_for_repository)
       @event_store.publish(
         aggregate.unpublished_events,

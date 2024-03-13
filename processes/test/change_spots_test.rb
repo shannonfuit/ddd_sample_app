@@ -14,7 +14,8 @@ module Processes
 
     test 'approve change_request if spots can be changed like requested' do
       events = [change_request_submitted, spots_changed_as_requested, spots_set_in_job_drafting]
-      expected_commands = [change_spots_in_job_fulfillment, change_spots_in_job_drafting, approve_spots_change_request]
+      expected_commands = [change_spots_in_job_fulfillment, change_spots_in_job_drafting(spots: 1),
+                           approve_spots_change_request]
 
       given(events).each { |event| @process.call(event) }
 
@@ -23,7 +24,8 @@ module Processes
 
     test 'reject_change_request if spots can only be changed to minimum required' do
       events = [change_request_submitted, spots_changed_to_minimum_required, spots_set_in_job_drafting]
-      expected_commands = [change_spots_in_job_fulfillment, change_spots_in_job_drafting, reject_spots_change_request]
+      expected_commands = [change_spots_in_job_fulfillment, change_spots_in_job_drafting(spots: 2),
+                           reject_spots_change_request]
 
       given(events).each { |event| @process.call(event) }
 
@@ -64,7 +66,7 @@ module Processes
     end
 
     def spots_set_in_job_drafting
-      JobDrafting::SpotsSetOnJob.new(
+      JobDrafting::SpotsChangedOnJob.new(
         data: {
           job_uuid: @job_uuid,
           change_request_uuid: @change_request_uuid,
@@ -83,11 +85,11 @@ module Processes
       )
     end
 
-    def change_spots_in_job_drafting
+    def change_spots_in_job_drafting(spots:)
       JobDrafting::ChangeSpots.new(
         change_request_uuid: @change_request_uuid,
         job_uuid: @job_uuid,
-        spots: 1
+        spots:
       )
     end
 

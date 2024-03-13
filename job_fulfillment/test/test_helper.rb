@@ -10,9 +10,11 @@ module JobFulfillment
       JobFulfillment.configure(command_bus, event_store)
     end
 
+    # rubocop: disable Metrics/MethodLength
     def setup
       super
       @uuid = SecureRandom.uuid
+      @company_uuid = SecureRandom.uuid
       @contact_uuid = SecureRandom.uuid
       @starts_on = 1.day.from_now
       @spots = 1
@@ -24,6 +26,7 @@ module JobFulfillment
 
       @stream = "JobFulfillment::Job$#{@uuid}"
     end
+    # rubocop: enable Metrics/MethodLength
 
     def publish_contact_registered
       event_store.publish(contact_registered)
@@ -48,7 +51,8 @@ module JobFulfillment
           user_uuid: @contact_uuid,
           first_name: 'Lara',
           last_name: 'Croft',
-          email: 'lara.croft@gmail.com'
+          email: 'lara.croft@gmail.com',
+          company_uuid: @company_uuid
         }
       )
     end

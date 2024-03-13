@@ -24,7 +24,7 @@ module JobFulfillment
       JobDrafting::JobPublished.new(
         data: {
           job_uuid: @uuid,
-          contact_uuid: @contact_uuid,
+          published_by: @contact_uuid,
           shift: { starts_on: @starts_on, ends_on: @starts_on + 1.day },
           spots: 1,
           vacancy: { title: 'MyTitle', description: 'MyDescription', dress_code_requirements: 'Black trousers' },

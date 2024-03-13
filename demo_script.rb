@@ -5,10 +5,20 @@ require File.expand_path('config/environment', __dir__)
 # custom_script.rb
 puts 'Running custom script within the Rails environment'
 
-def self.register_as_contact(user_uuid, first_name, last_name, email)
+def self.register_company(company_uuid, name)
+  Rails.configuration.command_bus.call(
+    Iam::RegisterCompany.new(
+      company_uuid:,
+      name:
+    )
+  )
+end
+
+def self.register_as_contact(user_uuid, company_uuid, first_name, last_name, email)
   Rails.configuration.command_bus.call(
     Iam::RegisterAsContact.new(
       user_uuid:,
+      company_uuid:,
       name: { first_name:, last_name: },
       email:
     )
@@ -98,8 +108,10 @@ def self.reject_application(job_uuid, application_uuid, contact_uuid)
   )
 end
 
-job_uuid = SecureRandom.uuid
+company_uuid = SecureRandom.uuid
 contact_uuid = SecureRandom.uuid
+
+job_uuid = SecureRandom.uuid
 
 change_request_uuid = SecureRandom.uuid
 
@@ -116,7 +128,8 @@ fourth_candidate_uuid = SecureRandom.uuid
 fourth_application_uuid = SecureRandom.uuid
 
 puts '##### Registering candidates'
-register_as_contact(contact_uuid, 'Peter', 'Peterson', 'pp@example.com')
+register_company(company_uuid, 'Example Inc.')
+register_as_contact(contact_uuid, company_uuid, 'Peter', 'Peterson', 'pp@example.com')
 register_as_candidate(first_candidate_uuid, 'John', 'Doe', 'john.doe@example.com')
 register_as_candidate(second_candidate_uuid, 'Jane', 'Doe', 'jane.doe@example.com')
 register_as_candidate(third_candidate_uuid, 'Alice', 'Smith', 'alice.smith@example.com')

@@ -7,6 +7,7 @@ require_relative 'iam/events'
 
 module Iam
   def self.configure(command_bus, _event_store)
+    command_bus.register(RegisterCompany, OnRegisterCompany.new)
     command_bus.register(RegisterAsContact, OnRegisterAsContact.new)
     command_bus.register(RegisterAsCandidate, OnRegisterAsCandidate.new)
   end

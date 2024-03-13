@@ -8,6 +8,7 @@ module JobDrafting
       @change_request_uuid = SecureRandom.uuid
       @job_uuid = SecureRandom.uuid
       @contact_uuid = SecureRandom.uuid
+      @company_uuid = SecureRandom.uuid
       @stream = "JobDrafting::SpotsChangeRequest$#{@change_request_uuid}"
     end
 
@@ -78,7 +79,8 @@ module JobDrafting
           user_uuid: @contact_uuid,
           first_name: 'John',
           last_name: 'Doe',
-          email: 'john.doe@example.com'
+          email: 'john.doe@example.com',
+          company_uuid: @company_uuid
         }
       )
     end

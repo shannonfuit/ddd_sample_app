@@ -13,15 +13,15 @@ module JobDrafting
     attribute :work_location, Infra::Types::Address
   end
 
-  class UnpublishJob < Infra::Command
-    attribute :job_uuid, Infra::Types::UUID
-    attribute :contact_uuid, Infra::Types::UUID
-  end
-
   class ChangeSpots < Infra::Command
     attribute :job_uuid, Infra::Types::UUID
     attribute :change_request_uuid, Infra::Types::UUID
     attribute :spots, Infra::Types::Spots
+  end
+
+  class UnpublishJob < Infra::Command
+    attribute :job_uuid, Infra::Types::UUID
+    attribute :contact_uuid, Infra::Types::UUID
   end
 
   class SubmitSpotsChangeRequest < Infra::Command
