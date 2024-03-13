@@ -26,14 +26,6 @@ module JobDrafting
   end
 
   # Job command handlers
-  class OnChangeSpots < JobCommandHandler
-    def call(command)
-      repository.with_job(command.job_uuid) do |job|
-        job.set_spots(command.spots, change_request_uuid: command.change_request_uuid)
-      end
-    end
-  end
-
   class OnUnpublishJob < JobCommandHandler
     def call(command)
       contact = user_registry.find_user!(command.contact_uuid, role: :contact)

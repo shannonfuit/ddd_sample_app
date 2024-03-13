@@ -4,7 +4,7 @@ module JobDrafting
   class Job
     include AggregateRoot
 
-    class JobIsNotPublished < StandardError; end
+    class NotPublished < StandardError; end
 
     def initialize(uuid)
       @uuid = uuid
@@ -13,7 +13,7 @@ module JobDrafting
 
     def unpublish(contact_uuid)
       return if unpublished?
-      raise JobIsNotPublished unless published?
+      raise NotPublished unless published?
 
       apply JobUnpublished.new(
         data: {
@@ -24,6 +24,10 @@ module JobDrafting
     end
 
     private
+
+    on SpotsChangedOnJob do |event|
+      @spots = event.data.fetch(:spots)
+    end
 
     on JobUnpublished do |_event|
       @state = :unpublished

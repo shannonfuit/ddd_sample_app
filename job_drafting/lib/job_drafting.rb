@@ -16,6 +16,6 @@ module JobDrafting
     command_bus.register(RejectSpotsChangeRequest, OnRejectSpotsChangeRequest.new)
 
     # registering events
-    event_store.subscribe(AddUserOnUserRegistered.new, to: [Iam::CandidateRegistered, Iam::ContactRegistered])
+    event_store.subscribe(AddUserOnUserRegistered.new, to: [Iam::ContactRegistered])
   end
 end

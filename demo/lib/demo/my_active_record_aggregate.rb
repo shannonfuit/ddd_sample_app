@@ -12,18 +12,18 @@ module Demo
     end
 
     def do_something_fast
-      apply FastItemAdded.new(data: { amount_of_items: @amount_of_items })
       @amount_of_items += 1
+      apply FastItemAdded.new(data: { amount_of_items: @amount_of_items })
       puts '*** on FastItemAdded'
-      puts @amount_of_items
+      puts "Amount of items is now: #{@amount_of_items}"
     end
 
     def do_something_slow
       sleep 10
-      apply SlowItemAdded.new(data: { amount_of_items: @amount_of_items })
       @amount_of_items += 1
+      apply SlowItemAdded.new(data: { amount_of_items: @amount_of_items })
       puts '*** on SlowItemAdded'
-      puts @amount_of_items
+      puts "Amount of items is now: #{@amount_of_items}"
     end
 
     def state_for_repository

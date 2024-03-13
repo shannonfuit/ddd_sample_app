@@ -67,7 +67,8 @@ module JobDrafting
             user_uuid: @contact_uuid,
             first_name: 'John',
             last_name: 'Doe',
-            email: 'john.doe@example.com'
+            email: 'john.doe@example.com',
+            company_uuid: @company_uuid
           }
         )
       )

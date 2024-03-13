@@ -8,3 +8,9 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# until we fixed the invitation feature for contacts, we will create a company here
+Iam::RegisterCompany(
+  company_uuid: SecureRandom.uuid,
+  name: 'HelloFresh'
+)
