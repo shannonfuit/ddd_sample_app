@@ -140,7 +140,7 @@ module JobFulfillment
 
     on ApplicationWithdrawn do |event|
       application = @applications.find_by(uuid: event.data.fetch(:application_uuid))
-      application.withdraw
+      application.withdraw(event.data.fetch(:candidate_uuid))
     end
 
     on ApplicationRejected do |event|

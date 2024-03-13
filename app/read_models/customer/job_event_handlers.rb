@@ -4,11 +4,14 @@ module Customer
   module JobEventHandlers
     class EventHandler < Infra::EventHandler
       def update_job(job_uuid, &)
-        job = Job.find_by(uuid: job_uuid)
-        return unless job
+        Job.transaction do
+          job = Job.lock.find_by(uuid: job_uuid)
 
-        yield(job)
-        job.save
+          if job
+            yield(job)
+            job.save
+          end
+        end
       end
 
       def change_application(job, application_attributes)

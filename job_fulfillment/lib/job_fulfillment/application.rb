@@ -5,6 +5,7 @@ module JobFulfillment
     NotFound = Class.new(StandardError)
     NotPending = Class.new(StandardError)
     AlreadySubmitted = Class.new(StandardError)
+    CandidateMismatch = Class.new(StandardError)
 
     class Collection < Array
       def find_by(**args)
@@ -54,8 +55,9 @@ module JobFulfillment
       @status = :pending
     end
 
-    def withdraw
+    def withdraw(candidate_uuid)
       raise NotPending unless pending?
+      raise CandidateMismatch unless candidate_uuid == @candidate_uuid
 
       @status = :withdrawn
     end
